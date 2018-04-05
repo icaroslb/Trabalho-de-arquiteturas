@@ -110,11 +110,11 @@ void ULA(){
 	
 	//Verifica o resultado do zero e não zero da ULA
 	if(bC){
-		zero=1;
-		nzero=0;
-	}else{
 		zero=0;
 		nzero=1;
+	}else{
+		zero=1;
+		nzero=0;
 	}
 	
 	//Faz o deslocamento do deslocador
