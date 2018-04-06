@@ -39,6 +39,8 @@ int main(){
 		barramentoB();
 		ULA();
 		gravacao();
+
+		//Onde dever vir a função da memoria
 		pular();
 
 		exibe_processo();
