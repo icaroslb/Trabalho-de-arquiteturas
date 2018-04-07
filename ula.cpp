@@ -1,67 +1,131 @@
 #include <iostream>
+#include <cstring>
 using namespace std;
 
 typedef unsigned int palavra;
 typedef unsigned char byte;
 typedef unsigned long int microinstrucao;
 
-palavra MAR = 0, MDR = 0, PC = 0, SP = 0, LV = 0, CPP = 0, TOS = 0, OPC = 0, H = 0;	//Registradores
-palavra bA, bB, bC; 	//Barramentos
+//Registradores
+palavra MAR = 0, MDR = 0, PC = 0, SP = 0, LV = 0, CPP = 0, TOS = 0, OPC = 0, H = 0;	
 
-byte MBR = 0, zero = 0, nzero = 0; //Informações para o MPC e desclocador
+//Barramentos
+palavra bA, bB, bC;
+
+//Informações para o MPC e desclocador
+byte MBR = 0, zero = 0, nzero = 0; 
 
 //Separações da microinstrução
-byte posB, opera, pulo, deslocador = 0; 
-palavra gravar, MPC = 0; 
+byte mi_barramentoB, mi_operacao, mi_pulo, mi_memoria, mi_deslocador = 0; 
+palavra mi_gravar, MPC = 0; 
 
-//Firmware que controla a ULA
-microinstrucao memoria[512];
+//firmware que controla a ULA
+microinstrucao armazenamento[512];
+microinstrucao mi;
 
-void interpretador();
+//Memoria principal do emulador
+byte memoria[1100];
+
+void decodificar_microinstrucao();
 void ULA();
-void barramentoB();
-void gravacao();
+void atribuir_barramentoB();
+void atribuir_registradores();
 void pular();
+void operar_memoria();
 
 void exibe_processo();
 
 int main(){
 	//Microinstrução que vai contar de 1 a 4 no LV e somar 4 ao LV
-	memoria[0] = 0b000000001000001101010000100000101;
-	memoria[1] = 0b000000010000001101010000100000101;
-	memoria[2] = 0b000000011000001101010000100000101;
-	memoria[3] = 0b000000100000001101010000100000101;
-	memoria[4] = 0b000000101000000101001000000000101;
-	memoria[5] = 0b000000101000001111000000100000101;
+	//armazenamento[0] = 0b000000001000001101010000100000000101;
+	//armazenamento[1] = 0b000000010000001101010000100000000101;
+	//armazenamento[2] = 0b000000011000001101010000100000000101;
+	//armazenamento[3] = 0b000000100000001101010000100000000101;
+	//armazenamento[4] = 0b000000101000000101001000000000000101;
+	//armazenamento[5] = 0b000000101000001111000000100000000101;
+
+	//PROGRAMA DA MEMORIA
+	memoria[1] = 2;
+	memoria[2] = 5;
+
+	memoria[3] = 13;
+	memoria[4] = 3;
+
+	memoria[12] = 0b00000011;
+	memoria[13] = 0;
+	memoria[14] = 0;
+	memoria[15] = 0;
+
+	memoria[20] = 0b00001001;
+	memoria[21] = 0;
+	memoria[22] = 0;
+	memoria[23] = 0;
+
+	//FIRMWARE
+	//MAIN
+	armazenamento[0] = 0b000000000100001101010000001000010001; //PC <- PC + 1; fetch; GOTO MBR;
+
+	//OPC = OPC + memory[end_word];  (Linguagem de máquina: Byte 2; Sintaxe assembly: ADD OPC, [END])
+	armazenamento[2] = 0b000000011000001101010000001000010001; //PC <- PC + 1; fetch;
+	armazenamento[3] = 0b000000100000000101000000000010100010; //MAR <- MBR; read;
+	armazenamento[4] = 0b000000101000000101001000000000000000; //H <- MDR;
+	armazenamento[5] = 0b000000000000001111000100000000001000; //OPC <- OPC + H; GOTO MAIN;
+
+	//memory[end_word] = OPC;  (Linguagem de maquina: Byte 6; Sintaxe assembly: MOV OPC, [END])
+	armazenamento[6] = 0b000000111000001101010000001000010001; //PC <- PC + 1; fetch;
+	armazenamento[7] = 0b000001000000000101000000000010000010; //MAR <- MBR;
+	armazenamento[8] = 0b000000000000000101000000000101001000; //MDR <- OPC; write; GOTO MAIN;
+
+	//goto endereco_comando_programa; (Linguagem de mÃ¡quina: Byte 9; Sintaxe assembly: GOTO byte)
+	armazenamento[9]  = 0b000001010000001101010000001000010001; //PC <- PC + 1; fetch;
+	armazenamento[10] = 0b000000000100000101000000001000010010; //PC <- MBR; fetch; GOTO MBR;
+
+	//if OPC = 0 goto endereco_comando_programa else goto proxima_linha; (Linguagem de mÃ¡quina: Byte 11; Sintaxe assembly: JZ OPC, byte)
+	armazenamento[11]  = 0b000001100001000101000100000000001000; //OPC <- OPC; IF ALU = 0 GOTO 268 (100001100) ELSE GOTO 12 (000001100);
+	armazenamento[12]  = 0b000000000000001101010000001000000001; //PC <- PC + 1; GOTO MAIN;
+	armazenamento[268] = 0b100001101000001101010000001000010001; //PC <- PC + 1; fetch;
+	armazenamento[269] = 0b000000000100000101000000001000010010; //PC <- MBR; fetch; GOTO MBR;
+
+	//OPC = OPC - memory[end_word];  (Linguagem de maquina: Byte 13; Sintaxe assembly: SUB OPC, [END])
+	armazenamento[13] = 0b000001110000001101010000001000010001; //PC <- PC + 1; fetch;
+	armazenamento[14] = 0b000001111000000101000000000010100010; //MAR <- MBR; read;
+	armazenamento[15] = 0b000010000000000101001000000000000000; //H <- MDR;
+	armazenamento[16] = 0b000000000000001111110100000000001000; //OPC <- OPC - H; GOTO MAIN;
+
 
 	while(true){
-		interpretador();
-		barramentoB();
-		ULA();
-		gravacao();
-
-		//Onde dever vir a função da memoria
-		pular();
+		mi = armazenamento[MPC];
 
 		exibe_processo();
+
+		//Conjunto de operações realizadas
+		decodificar_microinstrucao();
+		atribuir_barramentoB();
+		ULA();
+		atribuir_registradores();
+		operar_memoria();
+		pular();
+
+		
 	}
 	return 0;
 }
 
-//Onde será feita a separação da microinstrução e as operações
-void interpretador(){
-	posB = memoria[MPC] & 0b1111;				//Qual dos registradores será usado no barramento B
-	gravar = (memoria[MPC] >> 4) & 0b111111111;	//Qual dos registradores será gravado o barramento C
-	opera = (memoria[MPC] >> 13) & 0b111111;	//Qual a operação que será feita na ULA
-	deslocador = (memoria[MPC] >> 19) & 0b11;	//Qual será a operação feita pelo deslocador
-	pulo = (memoria[MPC] >> 21) & 111;			//Se haverá pulo ou não
-	MPC = (memoria[MPC] >> 24) & 0b111111111;	//Qual será a próxima instrução
+//Onde será feita a separação da microinstrução e as mi_operacaoções
+void decodificar_microinstrucao(){
+	mi_barramentoB = mi & 0b1111;			//Qual dos registradores será usado no barramento B
+	mi_memoria = (mi >> 4) & 0b111;			//Qual operação será feita com a memoria principal
+	mi_gravar = (mi >> 7) & 0b111111111;	//Qual dos registradores será gravado o barramento C
+	mi_operacao = (mi >> 16) & 0b111111;	//Qual a operacaoção que será feita na ULA
+	mi_deslocador = (mi >> 22) & 0b11;		//Qual será a operação feita pelo deslocador
+	mi_pulo = (mi >> 24) & 111;				//Se haverá pulo ou não
+	MPC = (mi >> 27) & 0b111111111;			//Qual será a próxima instrução
 		
 }
 
 //Faz a atribuição do barramento B
-void barramentoB(){
-	switch(posB){
+void atribuir_barramentoB(){
+	switch(mi_barramentoB){
 		case 0: bB = MDR;			break;
 		case 1: bB = PC;			break;
 		case 2: bB = MBR;			break;
@@ -77,59 +141,71 @@ void barramentoB(){
 }
 
 //Grava o resultado através do barramento C
-void gravacao(){
-	if(gravar & 1) MAR = bC;
-	if(gravar & 2) MDR = bC;
-	if(gravar & 4) PC = bC;
-	if(gravar & 8) SP = bC;
-	if(gravar & 16) LV = bC;
-	if(gravar & 32) CPP = bC;
-	if(gravar & 64) TOS = bC;
-	if(gravar & 128) OPC = bC;
-	if(gravar & 256) H = bC;
+void atribuir_registradores(){
+	if(mi_gravar & 1)   MAR = bC;
+	if(mi_gravar & 2)   MDR = bC;
+	if(mi_gravar & 4)   PC  = bC;
+	if(mi_gravar & 8)   SP  = bC;
+	if(mi_gravar & 16)  LV  = bC;
+	if(mi_gravar & 32)  CPP = bC;
+	if(mi_gravar & 64)  TOS = bC;
+	if(mi_gravar & 128) OPC = bC;
+	if(mi_gravar & 256) H   = bC;
 }
 
-//Faz a operação do pulo
+//Faz a mi_operacaoção do mi_pulo
 void pular(){
-	if(pulo & 1) MPC=MPC | zero << 7;
-	if(pulo & 2) MPC=MPC | nzero << 7;
-	if(pulo & 4) MPC=MPC | MBR;
+	if(mi_pulo & 1) MPC = MPC | zero << 7;
+	if(mi_pulo & 2) MPC = MPC | nzero << 7;
+	if(mi_pulo & 4) MPC = MPC | MBR;
 }
 
-//Faz a operação da ULA
+//Faz a mi_operacaoção da ULA
 void ULA(){
-	switch(opera){
-		case 24: bC = H;			break;
-		case 20: bC = bB;			break;
-		case 26: bC = ~H;			break;
-		case 44: bC = ~bB;			break;
-		case 60: bC = H + bB;		break;
-		case 61: bC = H + bB + 1;	break;
-		case 57: bC = H + 1;		break;
-		case 53: bC = bB + 1;		break;
-		case 63: bC = bB - H;		break;
-		case 54: bC = bB - 1;		break;
-		case 59: bC = -H;			break;
+	switch(mi_operacao){
 		case 12: bC = H & bB;		break;
-		case 28: bC = H | bB;		break;
 		case 17: bC = 1;			break;
 		case 18: bC = -1;			break;
+		case 20: bC = bB;			break;
+		case 24: bC = H;			break;
+		case 26: bC = ~H;			break;
+		case 28: bC = H | bB;		break;
+		case 44: bC = ~bB;			break;
+		case 53: bC = bB + 1;		break;
+		case 54: bC = bB - 1;		break;
+		case 57: bC = H + 1;		break;
+		case 59: bC = -H;			break;
+		case 60: bC = H + bB;		break;
+		case 61: bC = H + bB + 1;	break;
+		case 63: bC = bB - H;		break;
+
 		default: break;
 	}
 	
 	//Verifica o resultado do zero e não zero da ULA
 	if(bC){
-		zero=0;
-		nzero=1;
+		zero = 0;
+		nzero = 1;
 	}else{
-		zero=1;
-		nzero=0;
+		zero = 1;
+		nzero = 0;
 	}
 	
-	//Faz o deslocamento do deslocador
-	switch(deslocador){
-		case 1: bC=bC >> 1;
-		case 2: bC=bC << 8;
+	//Faz o deslocamento do mi_deslocador
+	switch(mi_deslocador){
+		case 1: bC = bC >> 1;
+		case 2: bC = bC << 8;
+	}
+}
+
+//Operações Fetch, Read, Write da memória
+void operar_memoria(){
+	switch(mi_memoria){
+		case 1: MBR = memoria[PC]; break;
+		case 2: memcpy(&MDR, &memoria[MAR*4], 4); break;
+		case 3: memcpy(&memoria[MAR*4], &MDR, 4); break;
+
+		default: break;
 	}
 }
 
