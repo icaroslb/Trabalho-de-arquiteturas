@@ -49,21 +49,27 @@ int main(){
 	//armazenamento[5] = 0b000000101000001111000000100000000101;
 
 	//PROGRAMA DA MEMORIA
-	memoria[1] = 2;
-	memoria[2] = 5;
 
-	memoria[3] = 13;
-	memoria[4] = 3;
+	memoria[1] = 2;			memoria[2] = 25;
+	memoria[3] = 6;			memoria[4] = 28;
+	memoria[5] = 13;		memoria[6] = 25;
+	memoria[7] = 2;			memoria[8] = 28;
+	memoria[9] = 11;		memoria[10] = 27;
+	memoria[11] = 13;		memoria[12] = 26;
+	memoria[13] = 6;		memoria[14] = 28;
+	memoria[15] = 13;		memoria[16] = 28;
+	memoria[17] = 2;		memoria[18] = 27;
+	memoria[19] = 2;		memoria[20] = 29;
+	memoria[21] = 6;		memoria[22] = 27;
+	memoria[23] = 13;		memoria[24] = 27;
+	memoria[25] = 9;		memoria[26] = 7;
+	memoria[27] = 9;		memoria[28] = 27;
 
-	memoria[12] = 0b00000011;
-	memoria[13] = 0;
-	memoria[14] = 0;
-	memoria[15] = 0;
-
-	memoria[20] = 0b00001001;
-	memoria[21] = 0;
-	memoria[22] = 0;
-	memoria[23] = 0;
+	memoria[25*4] = 100;
+	memoria[26*4] = 50;
+	memoria[27*4] = 0;
+	memoria[28*4] = 0;
+	memoria[29*4] = 1;
 
 	//FIRMWARE
 	//MAIN
@@ -123,7 +129,7 @@ void decodificar_microinstrucao(){
 	mi_operacao = (mi >> 16) & 0b111111;	//Qual a operacaoção que será feita na ULA
 	mi_deslocador = (mi >> 22) & 0b11;		//Qual será a operação feita pelo deslocador
 	mi_pulo = (mi >> 24) & 0b111;			//Se haverá pulo ou não
-	MPC = (mi >> 27) & 0b111111111;			//Qual será a próxima instrução
+	MPC = (mi >> 27) & 0b111111111;			//Qual será a próxima instruçãoss
 		
 }
 
@@ -159,9 +165,10 @@ void atribuir_registradores(){
 
 //Faz a mi_operacaoção do mi_pulo
 void pular(){
-	if(mi_pulo & 1) MPC = MPC | zero << 7;
-	if(mi_pulo & 2) MPC = MPC | nzero << 7;
+	if(mi_pulo & 1) MPC = MPC | (zero << 8);
+	if(mi_pulo & 2) MPC = MPC | (nzero << 8);
 	if(mi_pulo & 4) MPC = MPC | MBR;
+
 }
 
 //Faz a mi_operacaoção da ULA
@@ -227,5 +234,8 @@ void exibe_processo(){
 	cout << "\nOPC: " << OPC;
 	cout << "\nH  : " << H;
 	cout << "\n";
+	cout << "\nProxima instrucao MPC: " << MPC;
+	cout << "\n";
+
 	getchar();
 }
