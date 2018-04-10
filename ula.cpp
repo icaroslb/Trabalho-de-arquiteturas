@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstring>
+#include <cstdio>
+#include <cstdlib>
 using namespace std;
 
 typedef unsigned int palavra;
@@ -7,13 +9,15 @@ typedef unsigned char byte;
 typedef unsigned long int microinstrucao;
 
 //Registradores
-palavra MAR = 0, MDR = 0, PC = 0, SP = 0, LV = 0, CPP = 0, TOS = 0, OPC = 0, H = 0;	
+palavra MAR = 0, MDR = 0, PC = 0; 	//ACESSO MEMÓRIA
+byte MBR = 0; 						//ACESSO MEMÓRIA
+palavra SP = 0, LV = 0, CPP = 0, TOS = 0, OPC = 0, H = 0;//OPERAÇÃO NA ULA
 
 //Barramentos
 palavra bA, bB, bC;
 
-//Informações para o MPC e desclocador
-byte MBR = 0, zero = 0, nzero = 0; 
+//Informações para o desclocador
+byte zero = 0, nzero = 0; 
 
 //Separações da microinstrução
 byte mi_barramentoB, mi_operacao, mi_pulo, mi_memoria, mi_deslocador = 0; 
@@ -118,7 +122,7 @@ void decodificar_microinstrucao(){
 	mi_gravar = (mi >> 7) & 0b111111111;	//Qual dos registradores será gravado o barramento C
 	mi_operacao = (mi >> 16) & 0b111111;	//Qual a operacaoção que será feita na ULA
 	mi_deslocador = (mi >> 22) & 0b11;		//Qual será a operação feita pelo deslocador
-	mi_pulo = (mi >> 24) & 111;				//Se haverá pulo ou não
+	mi_pulo = (mi >> 24) & 0b111;			//Se haverá pulo ou não
 	MPC = (mi >> 27) & 0b111111111;			//Qual será a próxima instrução
 		
 }
@@ -193,17 +197,17 @@ void ULA(){
 	
 	//Faz o deslocamento do mi_deslocador
 	switch(mi_deslocador){
-		case 1: bC = bC >> 1;
-		case 2: bC = bC << 8;
+		case 1: bC = bC >> 1;		break;
+		case 2: bC = bC << 8;		break;
 	}
 }
 
 //Operações Fetch, Read, Write da memória
 void operar_memoria(){
 	switch(mi_memoria){
-		case 1: MBR = memoria[PC]; break;
-		case 2: memcpy(&MDR, &memoria[MAR*4], 4); break;
-		case 3: memcpy(&memoria[MAR*4], &MDR, 4); break;
+		case 1: MBR = memoria[PC]; 					break;//FEATCH
+		case 2: memcpy(&MDR, &memoria[MAR*4], 4);	break;//READ
+		case 4: memcpy(&memoria[MAR*4], &MDR, 4); 	break;//WRITE
 
 		default: break;
 	}
