@@ -91,7 +91,12 @@ void atribuir_barramentoB(){
 		case 0: bB = MDR;			break;
 		case 1: bB = PC;			break;
 		case 2: bB = MBR;			break;
-		case 3: bB = MBR;			break;
+		case 3: bB = MBR;
+				/*Esta linha irá fazer a verificação para o sinal. Para o emulador o sinal será a repetição do
+				8º bit (o mais siginificativo) do MBR nos 8 bits mais significativos. Por isso, se o 8 bit
+				for 0, já estará com 8 0's, porém, se for 1, acrescenta 1's nos 8 bits mais siginificativos.*/
+				if(MBR & (0b1 << 7)) bB = bB | (0b11111111 << 8);
+									break;
 		case 4: bB = SP;			break;
 		case 5: bB = LV;			break;
 		case 6: bB = CPP;			break;
