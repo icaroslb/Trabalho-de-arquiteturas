@@ -130,22 +130,23 @@ void pular(){
 
 //Faz a mi_operacaoção da ULA
 void ULA(){
+	bA = H;
 	switch(mi_operacao){
-		case 12: bC = H & bB;		break;
+		case 12: bC = bA & bB;		break;
 		case 17: bC = 1;			break;
 		case 18: bC = -1;			break;
 		case 20: bC = bB;			break;
-		case 24: bC = H;			break;
-		case 26: bC = ~H;			break;
-		case 28: bC = H | bB;		break;
+		case 24: bC = bA;			break;
+		case 26: bC = ~bA;			break;
+		case 28: bC = bA | bB;		break;
 		case 44: bC = ~bB;			break;
 		case 53: bC = bB + 1;		break;
 		case 54: bC = bB - 1;		break;
-		case 57: bC = H + 1;		break;
-		case 59: bC = -H;			break;
-		case 60: bC = H + bB;		break;
-		case 61: bC = H + bB + 1;	break;
-		case 63: bC = bB - H;		break;
+		case 57: bC = bA + 1;		break;
+		case 59: bC = -bA;			break;
+		case 60: bC = bA + bB;		break;
+		case 61: bC = bA + bB + 1;	break;
+		case 63: bC = bB - bA;		break;
 
 		default: break;
 	}
