@@ -64,12 +64,13 @@ int main(){
 }
 
 void carrega_microprograma(){
-	fstream microprograma;
-	microprograma.open("microprog.rom", ios::in|ios::binary);
+	FILE *microprograma;
+	microprograma = fopen("microprog.rom", "rb");
 
-	if (microprograma) {
-		microprograma.read(reinterpret_cast<char*>(armazenamento), 512*sizeof(microinstrucao));
-		microprograma.close();
+	if (microprograma != NULL) {
+		fread(armazenamento, sizeof(microinstrucao), 512, microprograma);
+		fclose(microprograma);
+
 	}
 }
 
@@ -88,21 +89,17 @@ void decodificar_microinstrucao(){
 //Faz a atribuição do barramento B
 void atribuir_barramentoB(){
 	switch(mi_barramentoB){
-		case 0: bB = MDR;			break;
-		case 1: bB = PC;			break;
-		case 2: bB = MBR;			break;
+		case 0: bB = MDR;										break;
+		case 1: bB = PC;										break;
+		case 2: bB = MBR;										break;
 		case 3: bB = MBR;
-				/*Esta linha irá fazer a verificação para o sinal. Para o emulador o sinal será a repetição do
-				8º bit (o mais siginificativo) do MBR nos 8 bits mais significativos. Por isso, se o 8 bit
-				for 0, já estará com 8 0's, porém, se for 1, acrescenta 1's nos 8 bits mais siginificativos.*/
-				if(MBR & (0b1 << 7)) bB = bB | (0b11111111 << 8);
-									break;
-		case 4: bB = SP;			break;
-		case 5: bB = LV;			break;
-		case 6: bB = CPP;			break;
-		case 7: bB = TOS;			break;
-		case 8: bB = OPC;			break;
-		default: bB = -1;			break;
+			if(MBR & (0b1 << 7)) bB = bB | (0b11111111 << 8);	break;
+		case 4: bB = SP;										break;
+		case 5: bB = LV;										break;
+		case 6: bB = CPP;										break;
+		case 7: bB = TOS;										break;
+		case 8: bB = OPC;										break;
+		default: bB = -1;										break;
 	}
 	
 }
@@ -130,23 +127,22 @@ void pular(){
 
 //Faz a mi_operacaoção da ULA
 void ULA(){
-	bA = H;
 	switch(mi_operacao){
-		case 12: bC = bA & bB;		break;
+		case 12: bC = H & bB;		break;
 		case 17: bC = 1;			break;
 		case 18: bC = -1;			break;
 		case 20: bC = bB;			break;
-		case 24: bC = bA;			break;
-		case 26: bC = ~bA;			break;
-		case 28: bC = bA | bB;		break;
+		case 24: bC = H;			break;
+		case 26: bC = ~H;			break;
+		case 28: bC = H | bB;		break;
 		case 44: bC = ~bB;			break;
 		case 53: bC = bB + 1;		break;
 		case 54: bC = bB - 1;		break;
-		case 57: bC = bA + 1;		break;
-		case 59: bC = -bA;			break;
-		case 60: bC = bA + bB;		break;
-		case 61: bC = bA + bB + 1;	break;
-		case 63: bC = bB - bA;		break;
+		case 57: bC = H + 1;		break;
+		case 59: bC = -H;			break;
+		case 60: bC = H + bB;		break;
+		case 61: bC = H + bB + 1;	break;
+		case 63: bC = bB - H;		break;
 
 		default: break;
 	}
@@ -203,5 +199,5 @@ void exibe_processo(){
 	cout << "\nAux_divisor: " << (int)memoria[31*4];
 
 	cout << "\n";
-	//getchar();
+	getchar();
 }
