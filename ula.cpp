@@ -39,6 +39,8 @@ void operar_memoria();
 
 void exibe_processo();
 
+void binario(byte *, int);
+
 int main(){
 	//Microinstrução que vai contar de 1 a 4 no LV e somar 4 ao LV
 	//armazenamento[0] = 0b000000001000001101010000100000000101;
@@ -238,4 +240,18 @@ void exibe_processo(){
 	cout << "\n";
 
 	getchar();
+}
+
+//Imprime o valor de uma palavra em binário
+void binario(byte *valor, int tam){
+	byte aux;
+	
+	for(int i = tam-1; i >= 0; i--){
+		aux = *(valor+tam);
+		for(int j = 0; j < 8; j++){
+			printf("%d", (aux >> 7) & 0b1);
+			aux = aux << 1;
+		}
+		printf(" ");
+	}
 }
