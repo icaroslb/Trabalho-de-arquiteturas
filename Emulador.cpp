@@ -44,7 +44,27 @@ void carrega_microprograma();
 
 int main(){
 	carrega_microprograma();
-
+	//Programa teste
+	memoria[1025] = 0x19;	memoria[1026] = 10;
+	memoria[1027] = 0x22;	memoria[1028] = 20;
+	memoria[1029] = 0x19;	memoria[1030] = 10;
+	memoria[1031] = 0x22;	memoria[1032] = 21;
+	memoria[1033] = 0x1C;	memoria[1034] = 20;
+	memoria[1035] = 0x1C;	memoria[1036] = 21;
+	memoria[1037] = 0x02;
+	memoria[1038] = 0x22;	memoria[1039] = 22;
+	memoria[1040] = 0x1C;	memoria[1041] = 22;
+	memoria[1042] = 0x19;	memoria[1043] = 25;
+	memoria[1044] = 0x4B;	memoria[1045] = 30;
+	memoria[1046] = 0x1C;	memoria[1047] = 20;
+	memoria[1048] = 0x19;	memoria[1049] = 1;
+	memoria[1050] = 0x05;
+	memoria[1051] = 0x22;	memoria[1052] = 20;
+	memoria[1053] = 0x3C;	memoria[1054] = 34;
+	memoria[1055] = 0x19;	memoria[1056] = 13;
+	memoria[1057] = 0x22;	memoria[1058] = 21;
+	memoria[1059] = 0x13;	memoria[1060] = 25;
+	
 	while(true){
 		mi = armazenamento[MPC];
 
