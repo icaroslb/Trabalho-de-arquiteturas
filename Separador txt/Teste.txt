@@ -1,0 +1,5 @@
+Main:
+	Flag2 ADD J
+	ADD P
+	ADD 3P
+	ADD poxa acho_que deu_ruim
