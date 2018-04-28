@@ -72,6 +72,20 @@ void carrega_microprograma(){
 		fclose(microprograma);
 
 	}
+	
+	//Inicializa a memória e os registradores
+	palavra tmp = 0x1001; //LV
+	
+	memoria[1] = 0x73; //init
+	memoria[4] = 0x0006; //(CPP inicia com o valor 0x0006 guardado na palavra 1 – bytes 4 a 7.)
+	memcpy(memoria+8, &tmp, 4); //(LV inicia com o valor de tmp guardado na palavra 2 – bytes 8 a 11)
+	tmp = 0x0400; //PC
+	memcpy(memoria+12, &tmp, 4); //(PC inicia com o valor de tmp guardado na palavra 3 – bytes 12 a 15)
+	tmp = 0x1001 + 3; //SP
+	//SP (Stack Pointer) é o ponteiro para o topo da pilha.
+	//A base da pilha é LV e ela já começa com algumas variáveis empilhadas (dependendo do programa).
+	//Cada variável gasta uma palavra de memória. Por isso a soma de LV com num_of_vars.
+	memcpy(memoria+16, &tmp, 4); //(SP inicia com o valor de tmp guardado na palavra 4 – bytes 16 a 19)
 }
 
 //Onde será feita a separação da microinstrução e as mi_operacaoções
