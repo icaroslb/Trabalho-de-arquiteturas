@@ -58,7 +58,7 @@ void exibir_processo();         //Exibe o processo no terminal.
 
 // Emulador
 
-int main() {
+int main(int argc, char *argv[]) {
 	carregar_microprograma();
 	carregar_programa();
 
@@ -91,7 +91,7 @@ void carregar_microprograma() {
 
 void carregar_programa() {
 	FILE *programa;
-	programa = fopen("program.exe", "rb");
+	programa = fopen(argv[1], "rb");
 
 	char tamanho_programa[1];					// Registra o tamanho do programa.
     fread(tamanho_programa, 1, 1, programa);
