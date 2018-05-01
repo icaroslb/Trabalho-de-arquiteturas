@@ -42,6 +42,8 @@ void exibe_processo();
 
 void carrega_microprograma();
 
+void binario(void *, int);
+
 int main(){
 	carrega_microprograma();
 	//Programa teste
@@ -211,19 +213,19 @@ void operar_memoria(){
 //Responsável por printar as informaçoes da ULA
 void exibe_processo(){
 	system("clear");
-	cout << "\nMAR: " << MAR;
-	cout << "\nMDR: " << MDR;
-	cout << "\nPC : " << PC;
-	cout << "\nMBR: " << (palavra)MBR;
-	cout << "\nSP : " << SP;
-	cout << "\nLV : " << LV;
-	cout << "\nCPP: " << CPP;
-	cout << "\nTOS: " << TOS;
-	cout << "\nOPC: " << OPC;
-	cout << "\nH  : " << H;
+	cout << "\nMAR: " << MAR; binario(&MAR , 3);
+	cout << "\nMDR: " << MDR; binario(&MDR , 3);
+	cout << "\nPC : " << PC; binario(&PC , 3);
+	cout << "\nMBR: " << (palavra)MBR; binario(&MBR , 2);
+	cout << "\nSP : " << SP; binario(&SP , 3);
+	cout << "\nLV : " << LV; binario(&LV , 3);
+	cout << "\nCPP: " << CPP; binario(&CPP , 3);
+	cout << "\nTOS: " << TOS; binario(&TOS , 3);
+	cout << "\nOPC: " << OPC; binario(&OPC , 3);
+	cout << "\nH  : " << H; binario(&H , 3);
 	cout << "\n";
 	cout << "\nProxima instrucao MPC: " << MPC;
-	cout << "\n";
+	cout << "\nValor da instrução: "; binario(armazenamento + MPC , 4);
 	cout << "\nDividendo: " << (int)memoria[25*4];
 	cout << "\nDivisor: " << (int)memoria[26*4];
 	cout << "\nQuociente: " << (int)memoria[27*4];
@@ -234,4 +236,46 @@ void exibe_processo(){
 
 	cout << "\n";
 	getchar();
+}
+
+void binario(void *valor, int tipo){
+	
+	printf("\t");
+	if(tipo == 1){
+		byte aux;
+		byte* valorAux = (byte*)valor;
+			
+		for(int i = 3; i >= 0; i--){
+			aux = *(valorAux + i);
+			for(int j = 0; j < 8; j++){
+				printf("%d", (aux >> 7) & 0b1);
+				aux = aux << 1;
+			}
+			printf(" ");
+		}
+	}else if(tipo == 2){
+		byte aux;
+		
+		aux = *((byte*)(valor));
+		for(int j = 0; j < 8; j++){
+			printf("%d", (aux >> 7) & 0b1);
+			aux = aux << 1;
+		}
+	}else if(tipo == 3){
+		palavra aux;
+		
+		aux = *((palavra*)(valor));
+		for(int j = 0; j < 16; j++){
+			printf("%d", (aux >> 15) & 0b1);
+			aux = aux << 1;
+		}
+	}else if(tipo == 4){
+		microinstrucao aux;
+		
+		aux = *((microinstrucao*)(valor));
+		for(int j = 0; j < 36; j++){
+			printf("%ld", (aux >> 35) & 0b1);
+			aux = aux << 1;
+		}
+	}
 }
