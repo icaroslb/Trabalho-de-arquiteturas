@@ -1,2 +1,2 @@
-Passar o nome do arquivo .asm como argumento para o assembler.
-Executar o emulador.
+Passar o nome do arquivo .asm como argumento para assembler.py.
+Passar o nome do arquivo .exe como argumento para emulator.c.
