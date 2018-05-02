@@ -106,7 +106,7 @@ void carregar_programa() {
 }
 
 void separar_microinstrucao() {
-    MIR_B   = (MIR)       & 0b1111;
+    	MIR_B   = (MIR)       & 0b1111;
 	MIR_Mem = (MIR >> 4)  & 0b111;
 	MIR_C   = (MIR >> 7)  & 0b111111111;
 	MIR_ALU = (MIR >> 16) & 0b11111111;
@@ -132,29 +132,32 @@ void atribuir_barramentoB() {
 
 void realizar_operacao_ALU() {
     switch((MIR_ALU << 2) >> 2 ) {
-        case 12: barramentoC = H & barramentoB;		    break;
-		case 17: barramentoC = 1;			            break;
-		case 18: barramentoC = -1;			            break;
-		case 20: barramentoC = barramentoB;			    break;
-		case 24: barramentoC = H;			            break;
-		case 26: barramentoC = ~H;			            break;
-		case 28: barramentoC = H | barramentoB;		    break;
+        	case 12: barramentoC = H & barramentoB;		break;
+		case 17: barramentoC = 1;			break;
+		case 18: barramentoC = -1;			break;
+		case 20: barramentoC = barramentoB;		break;
+		case 24: barramentoC = H;			break;
+		case 26: barramentoC = ~H;			break;
+		case 28: barramentoC = H | barramentoB;		break;
 		case 44: barramentoC = ~barramentoB;            break;
-		case 53: barramentoC = barramentoB + 1;         break;
-		case 54: barramentoC = barramentoB - 1;		    break;
-		case 57: barramentoC = H + 1;		            break;
-		case 59: barramentoC = -H;			            break;
-		case 60: barramentoC = H + barramentoB;		    break;
+		case 53: barramentoC = barramentoB + 1;		break;
+		case 54: barramentoC = barramentoB - 1;		break;
+		case 57: barramentoC = H + 1;		        break;
+		case 59: barramentoC = -H;			break;
+		case 60: barramentoC = H + barramentoB;		break;
 		case 61: barramentoC = H + barramentoB + 1;     break;
-		case 63: barramentoC = barramentoB - H;		    break;
+		case 63: barramentoC = barramentoB - H;		break;
 
 		default: break;
     }
 
     //Verifica se o resultado da ALU é 0.
 
-    if(barramentoC) N = 1;
-    else Z = 1;
+    if(barramentoC):
+	N = 1;
+	
+    else:
+	Z = 1;
 
     //Faz o deslocamento.
     
@@ -178,7 +181,7 @@ void atribuir_registradores() {
 
 void operar_memoria() {
 	switch(MIR_Mem) {
-		case 1: MBR = memoria[PC]; 					break;	//FETCH
+		case 1: MBR = memoria[PC]; 			break;	//FETCH
 		case 2: memcpy(&MDR, &memoria[MAR*4], 4);	break;	//READ
 		case 4: memcpy(&memoria[MAR*4], &MDR, 4); 	break;	//WRITE
 
@@ -208,20 +211,6 @@ void exibir_processo() {
 	printf("\n");
 	printf("\nMPC: %d", MPC);
 	printf("\n");
-
-	int y = 0;
-
-    for (int i = 0; i < 58; i++) {
-        if (y < 4) {
-            printf("Mem[%02d] : 0x0%x ", i, memoria[i]);
-            y++;
-        }
-        else {
-            y = 1;
-            printf("\n");
-            printf("Mem[%02d] : 0x0%x ", i, memoria[i]);
-        }
-	}
 	
 	getchar();
 }
