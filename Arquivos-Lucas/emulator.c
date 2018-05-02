@@ -92,12 +92,15 @@ void carregar_microprograma() {
 void carregar_programa() {
 	FILE *programa;
 	programa = fopen(argv[1], "rb");
+	word tamanho;
 
 	char tamanho_programa[4];					// Registra o tamanho do programa.
     	fread(tamanho_programa, 1, 4, programa);
+	memcpy(&tamanho, tamanho_programa, 4)
 
 	if (programa != NULL) {
-		fread(memoria, 1, tamanho_programa[0], programa);
+		fread(memoria, 1, 20, programa);
+		fread(&memoria[0x0401], 1, tamanho - 20, programa);
 		fclose(programa);
 	}
 }
