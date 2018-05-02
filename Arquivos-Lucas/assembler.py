@@ -164,9 +164,13 @@ def generate_file(): # Gera o arquivo final.
     global byte_counter
 
     final_byte_array = bytearray()      # Bytearray que será gravado no arquivo.
-
-    final_byte_array.append(byte_counter + 20)      # Escreve na primeira linha a quantidade de bytes do programa.
-
+   
+    # Escrevendo os 4 bytes de tamanho do programa. 
+    final_byte_array.append((byte_counter + 20) & 0xff)
+    final_byte_array.append(((byte_counter + 20) >> 8) & 0xff)
+    final_byte_array.append(((byte_counter + 20) >> 16) & 0xff)
+    final_byte_array.append(((byte_counter + 20) >> 24) & 0xff)
+    
     # Inicialização da memória.
     bytes_to_be_added = [0x00, 0x73, 0x00, 0x00, # memory[1]  = 0x0073
                          0x06, 0x00, 0x00, 0x00, # memory[4]  = 0x0006
