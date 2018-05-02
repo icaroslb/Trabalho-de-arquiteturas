@@ -275,8 +275,8 @@ void binario(void *valor, int tipo){
 		palavra aux;
 		
 		aux = *((palavra*)(valor));
-		for(int j = 0; j < 16; j++){
-			printf("%d", (aux >> 15) & 0b1);
+		for(int j = 0; j < 32; j++){
+			printf("%d", (aux >> 31) & 0b1);
 			aux = aux << 1;
 		}
 	}else if(tipo == 4){
