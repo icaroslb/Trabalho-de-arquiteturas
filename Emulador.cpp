@@ -41,32 +41,14 @@ void operar_memoria();
 void exibe_processo();
 
 void carrega_microprograma();
+void carrega_programa(const char *arquivo);
 
 void binario(void *, int);
 
-int main(){
+int main(int argc, const char *argv[]){
 	carrega_microprograma();
-	//Programa teste
-	memoria[1025] = 0x19;	memoria[1026] = 10;
-	memoria[1027] = 0x22;	memoria[1028] = 1;
-	memoria[1029] = 0x19;	memoria[1030] = 10;
-	memoria[1031] = 0x22;	memoria[1032] = 2;
-	memoria[1033] = 0x1C;	memoria[1034] = 1;
-	memoria[1035] = 0x1C;	memoria[1036] = 2;
-	memoria[1037] = 0x02;
-	memoria[1038] = 0x22;	memoria[1039] = 3;
-	memoria[1040] = 0x1C;	memoria[1041] = 3;
-	memoria[1042] = 0x19;	memoria[1043] = 25;
-	memoria[1044] = 0x4B;	memoria[1045] = 30;
-	memoria[1046] = 0x1C;	memoria[1047] = 1;
-	memoria[1048] = 0x19;	memoria[1049] = 1;
-	memoria[1050] = 0x05;
-	memoria[1051] = 0x22;	memoria[1052] = 1;
-	memoria[1053] = 0x3C;	memoria[1054] = 34;
-	memoria[1055] = 0x19;	memoria[1056] = 13;
-	memoria[1057] = 0x22;	memoria[1058] = 2;
-	memoria[1059] = 0x13;	memoria[1060] = 25;
-	
+	carrega_programa(argv[1]);
+
 	while(true){
 		mi = armazenamento[MPC];
 
@@ -94,20 +76,28 @@ void carrega_microprograma(){
 		fclose(microprograma);
 
 	}
+}
+
+void carrega_programa(const char *arquivo){
+	FILE *prog;
+	palavra tamanho;
+	byte tam[4];
+
+	prog = fopen(arquivo, "rb");
 	
-	//Inicializa a memória e os registradores
-	palavra tmp = 0x1001; //LV
-	
-	memoria[1] = 0x73; //init
-	memoria[4] = 0x0006; //(CPP inicia com o valor 0x0006 guardado na palavra 1 – bytes 4 a 7.)
-	memcpy(memoria+8, &tmp, 4); //(LV inicia com o valor de tmp guardado na palavra 2 – bytes 8 a 11)
-	tmp = 0x0400; //PC
-	memcpy(memoria+12, &tmp, 4); //(PC inicia com o valor de tmp guardado na palavra 3 – bytes 12 a 15)
-	tmp = 0x1001 + 3; //SP
-	//SP (Stack Pointer) é o ponteiro para o topo da pilha.
-	//A base da pilha é LV e ela já começa com algumas variáveis empilhadas (dependendo do programa).
-	//Cada variável gasta uma palavra de memória. Por isso a soma de LV com num_of_vars.
-	memcpy(memoria+16, &tmp, 4); //(SP inicia com o valor de tmp guardado na palavra 4 – bytes 16 a 19)
+	if (prog != NULL) {
+		fread(tam, sizeof(byte), 4, prog);
+		memcpy(&tamanho, tam, 4);
+
+		fread(memoria, sizeof(byte), 20, prog);
+		fread(&memoria[0x0401], sizeof(byte), tamanho-20, prog);
+		fclose(prog);
+
+		for (int i = 1024; i < 1124; i++) {
+			cout << "\nmemoria[" << i; cout << "] = " << (int)memoria[i];
+		}
+		getchar();
+	}
 }
 
 //Onde será feita a separação da microinstrução e as mi_operacaoções
@@ -201,38 +191,41 @@ void ULA(){
 
 //Operações Fetch, Read, Write da memória
 void operar_memoria(){
-	switch(mi_memoria){
-		case 1: MBR = memoria[PC]; 					break;//FEATCH
-		case 2: memcpy(&MDR, &memoria[MAR*4], 4);	break;//READ
-		case 4: memcpy(&memoria[MAR*4], &MDR, 4); 	break;//WRITE
-
-		default: break;
-	}
+	if(mi_memoria & 1) MBR = memoria[PC];					//FEATCH
+	if(mi_memoria & 2) memcpy(&MDR, &memoria[MAR*4], 4);	//READ
+	if(mi_memoria & 4) memcpy(&memoria[MAR*4], &MDR, 4);	//WRITE
 }
 
 //Responsável por printar as informaçoes da ULA
 void exibe_processo(){
 	system("clear");
-	cout << "\nMAR: " << MAR; binario(&MAR , 3);
-	cout << "\nMDR: " << MDR; binario(&MDR , 3);
-	cout << "\nPC : " << PC; binario(&PC , 3);
-	cout << "\nMBR: " << (palavra)MBR; binario(&MBR , 2);
-	cout << "\nSP : " << SP; binario(&SP , 3);
-	cout << "\nLV : " << LV; binario(&LV , 3);
-	cout << "\nCPP: " << CPP; binario(&CPP , 3);
-	cout << "\nTOS: " << TOS; binario(&TOS , 3);
-	cout << "\nOPC: " << OPC; binario(&OPC , 3);
-	cout << "\nH  : " << H; binario(&H , 3);
-	cout << "\n";
-	cout << "\nProxima instrucao MPC: " << MPC;
-	cout << "\nValor da instrução: "; binario(armazenamento + MPC , 4);
-	cout << "\nDividendo: " << (int)memoria[25*4];
-	cout << "\nDivisor: " << (int)memoria[26*4];
-	cout << "\nQuociente: " << (int)memoria[27*4];
-	cout << "\nResto: " << (int)memoria[28*4];
+	int base;
+	if (LV && SP) {
 
-	cout << "\nAux_resto: " << (int)memoria[30*4];
-	cout << "\nAux_divisor: " << (int)memoria[31*4];
+		cout << "\nBase da Pilha";	
+		for (int i = LV; i <= SP; i++) {
+			palavra valor;
+			memcpy(&valor, &memoria[i*4], 4);
+
+			cout << "\npalavra: " << i*4; cout << "| " << (int)valor;
+		}
+		cout << "\nTopo da Pilha";
+	}
+
+	cout << "\n";
+	cout << "\n  MAR:  " << MAR; cout << "\n"; binario(&MAR , 3); cout << "\n";
+	cout << "\n  MDR:  " << MDR; cout << "\n"; binario(&MDR , 3); cout << "\n";
+	cout << "\n  PC :  " << PC; cout << "\n"; binario(&PC , 3); cout << "\n";
+	cout << "\n  MBR:  " << (palavra)MBR; cout << "\n"; binario(&MBR , 2); cout << "\n";
+ 	cout << "\n  SP :  " << SP; cout << "\n"; binario(&SP , 3); cout << "\n";
+	cout << "\n  LV :  " << LV; cout << "\n"; binario(&LV , 3); cout << "\n";
+	cout << "\n  CPP:  " << CPP; cout << "\n"; binario(&CPP , 3); cout << "\n";
+	cout << "\n  TOS:  " << TOS; cout << "\n"; binario(&TOS , 3); cout << "\n";
+	cout << "\n  OPC:  " << OPC; cout << "\n"; binario(&OPC , 3); cout << "\n";
+	cout << "\n  H  :  " << H; cout << "\n"; binario(&H , 3); cout << "\n";
+	cout << "\n";
+	cout << "\n Proxima instrucao MPC: " << MPC;
+	cout << "\n Valor da instrução: "; binario(armazenamento + MPC , 4);
 
 	cout << "\n";
 	getchar();
