@@ -93,10 +93,6 @@ void carrega_programa(const char *arquivo){
 		fread(&memoria[0x0401], sizeof(byte), tamanho-20, prog);
 		fclose(prog);
 
-		for (int i = 1024; i < 1124; i++) {
-			cout << "\nmemoria[" << i; cout << "] = " << (int)memoria[i];
-		}
-		getchar();
 	}
 }
 
@@ -207,9 +203,11 @@ void exibe_processo(){
 			palavra valor;
 			memcpy(&valor, &memoria[i*4], 4);
 
-			cout << "\npalavra: " << i*4; cout << "| " << (int)valor;
+			cout << "\npalavra: " << i*4; cout << "Inteiro: " << (int)valor;
+			cout << "\n "; binario(&valor , 1);
 		}
-		cout << "\nTopo da Pilha";
+		cout << "\nTopo da Pilha\n";
+
 	}
 
 	cout << "\n";
@@ -258,8 +256,8 @@ void binario(void *valor, int tipo){
 		palavra aux;
 		
 		aux = *((palavra*)(valor));
-		for(int j = 0; j < 16; j++){
-			printf("%d", (aux >> 15) & 0b1);
+		for(int j = 0; j < 32; j++){
+			printf("%d", (aux >> 31) & 0b1);
 			aux = aux << 1;
 		}
 	}else if(tipo == 4){
