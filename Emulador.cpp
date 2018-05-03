@@ -195,43 +195,48 @@ void operar_memoria(){
 //Responsável por printar as informaçoes da ULA
 void exibe_processo(){
 	system("clear");
+	
+	cout << "\n  ##################################################";
+	cout << "\n  ###############    EMULADOR IJM    ###############";
+	cout << "\n  ##################################################\n\n";	
+	
 	int base;
 	if (LV && SP) {
 
-		cout << "\nBase da Pilha";	
-		for (int i = LV; i <= SP; i++) {
+		cout << "\n\t-------     PILHA DE EXECUÇÃO     -------\n";
+		cout << "\n\t\tBINÁRIO\t\t        PALAVRA   INT\n";
+		for (int i = SP; i >= LV; i--) {
 			palavra valor;
 			memcpy(&valor, &memoria[i*4], 4);
 
-			cout << "\npalavra: " << i*4; cout << "Inteiro: " << (int)valor;
-			cout << "\n "; binario(&valor , 1);
+			binario(&valor , 1); cout << "\t "<< i*4; cout << "\t  " << (int)valor; cout << "\n";
 		}
-		cout << "\nTopo da Pilha\n";
-
+		cout << "\n\t------- FIM DA PILHA DE EXECUÇÃO -------\n";
 	}
+	cout << "\n\n  #############      REGISTRADORES      #############\n";
+	cout << "\n\t\t\tBINÁRIO\t\t         INT";
+	cout << "\n  MAR :  "; binario(&MAR , 3); cout << "      " << MAR;
+	cout << "\n  MDR :  "; binario(&MDR , 3); cout << "      " << MDR;
+	cout << "\n  PC  :  "; binario(&PC  , 3); cout << "      " << PC;
+	cout << "\n  MBR :  "; binario(&MBR , 2); cout << "\t\t\t         " << (palavra)MBR;
+ 	cout << "\n  SP  :  "; binario(&SP  , 3); cout << "      " << SP;
+	cout << "\n  LV  :  "; binario(&LV  , 3); cout << "      " << LV;
+	cout << "\n  CPP :  "; binario(&CPP , 3); cout << "      " << CPP;
+	cout << "\n  TOS :  "; binario(&TOS , 3); cout << "      " << TOS;
+	cout << "\n  OPC :  "; binario(&OPC , 3); cout << "      " << OPC;
+	cout << "\n  H   :  "; binario(&H   , 3); cout << "      " << H;
+	cout << "\n";
+	cout << "\n  Próxima instrução\n  MPC :  "; binario(armazenamento + MPC , 4); cout << "  "<< MPC;
 
-	cout << "\n";
-	cout << "\n  MAR:  " << MAR; cout << "\n"; binario(&MAR , 3); cout << "\n";
-	cout << "\n  MDR:  " << MDR; cout << "\n"; binario(&MDR , 3); cout << "\n";
-	cout << "\n  PC :  " << PC; cout << "\n"; binario(&PC , 3); cout << "\n";
-	cout << "\n  MBR:  " << (palavra)MBR; cout << "\n"; binario(&MBR , 2); cout << "\n";
- 	cout << "\n  SP :  " << SP; cout << "\n"; binario(&SP , 3); cout << "\n";
-	cout << "\n  LV :  " << LV; cout << "\n"; binario(&LV , 3); cout << "\n";
-	cout << "\n  CPP:  " << CPP; cout << "\n"; binario(&CPP , 3); cout << "\n";
-	cout << "\n  TOS:  " << TOS; cout << "\n"; binario(&TOS , 3); cout << "\n";
-	cout << "\n  OPC:  " << OPC; cout << "\n"; binario(&OPC , 3); cout << "\n";
-	cout << "\n  H  :  " << H; cout << "\n"; binario(&H , 3); cout << "\n";
-	cout << "\n";
-	cout << "\n Proxima instrucao MPC: " << MPC;
-	cout << "\n Valor da instrução: "; binario(armazenamento + MPC , 4);
+	cout << "\n\n\n  ##################################################\n";
+	cout << "  ##################################################\n";
 
-	cout << "\n";
 	getchar();
 }
 
 void binario(void *valor, int tipo){
 	
-	printf("\t");
+	printf("  ");
 	if(tipo == 1){
 		byte aux;
 		byte* valorAux = (byte*)valor;
