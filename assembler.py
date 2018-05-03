@@ -179,6 +179,11 @@ def generate_file(): # Gera o arquivo final.
                          0x00, 0x04, 0x00, 0x00, # memory[12] = 0x0400
                          0x01, 0x10, 0x00, 0x00] # memory[16] = 0x1001
 
+    bytes_to_be_added[16] = (0x1001 + next_constant) & 0xff
+    bytes_to_be_added[17] = ((0x1001 + next_constant)>>8) & 0xff
+    bytes_to_be_added[18] = ((0x1001 + next_constant)>>16) & 0xff
+    bytes_to_be_added[19] = ((0x1001 + next_constant)>>24) & 0xff
+
     for byte in bytes_to_be_added:
         final_byte_array.append(byte)          # Escreve a inicialização da memória.
    
