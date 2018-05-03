@@ -28,40 +28,42 @@ next_constant = 0   # Contador global de constantes.
 
 def main():
     global byte_counter
+    try:
+        with open(sys.argv[1]) as program:      # Abre o arquivo de acordo com o argumento passado pela linha de comandos.
+            line_counter = 0
 
-    with open(sys.argv[1]) as program:      # Abre o arquivo de acordo com o argumento passado pela linha de comandos.
-        line_counter = 0
+            for line in program:
+                line_counter += 1
 
-        for line in program:
-            line_counter += 1
-
-            sline = line.lower().split()        # Separa os strings da linha que não são espaços em braco e os armazena em sline.
+                sline = line.lower().split()        # Separa os strings da linha que não são espaços em braco e os armazena em sline.
             
-            if sline != [] and not is_comment(sline[0]):        # Se linha vazia ou comentário, o programa segue para a próxima linha.
+                if sline != [] and not is_comment(sline[0]):        # Se linha vazia ou comentário, o programa segue para a próxima linha.
                 
-                if is_label(sline[0]):      # Verifica se a linha contém uma label.
-                    add_label(sline[0])
-                    del sline[0]
+                    if is_label(sline[0]):      # Verifica se a linha contém uma label.
+                        add_label(sline[0])
+                        del sline[0]
 
-                if is_valid_instruction(sline[0]):      # Verifica se a instrução é válida.
-                    add_instruction(sline[0])
+                    if is_valid_instruction(sline[0]):      # Verifica se a instrução é válida.
+                        add_instruction(sline[0])
 
-                else:
-                    add_error('invalid_instruction', line_counter)
+                    else:
+                        add_error('invalid_instruction', line_counter)
                     
-                if is_valid_operand(sline):     # Verifica se o(s) operando(s) é(são) válido(s).
-                    if sline[0] in operand_dict:
-                        add_operand(sline)
+                    if is_valid_operand(sline):     # Verifica se o(s) operando(s) é(são) válido(s).
+                        if sline[0] in operand_dict:
+                            add_operand(sline)
 
-                else:
-                    if ('Line: %02d' %line_counter) not in error_log:
-                        add_error('invalid_operand', line_counter)
+                    else:
+                        if ('Line: %02d' %line_counter) not in error_log:
+                            add_error('invalid_operand', line_counter)
 
-    if error_log == '':    
-        generate_file()     # Gera o arquivo final.
+        if error_log == '':
+            generate_file()     # Gera o arquivo final.
     
-    else:
-        print (error_log)
+        else:
+            print (error_log)
+    except:
+        print("Não achei o arquivo")
 
 # Escopo das funções. #
 
@@ -176,8 +178,12 @@ def generate_file(): # Gera o arquivo final.
     bytes_to_be_added = [0x00, 0x73, 0x00, 0x00, # memory[1]  = 0x0073
                          0x06, 0x00, 0x00, 0x00, # memory[4]  = 0x0006
                          0x01, 0x10, 0x00, 0x00, # memory[8]  = 0x1001
-                         0x00, 0x04, 0x00, 0x00, # memory[12] = 0x0400
+                         0x00, 0x00, 0x00, 0x00, # memory[12] = 0x0400
                          0x01, 0x10, 0x00, 0x00] # memory[16] = 0x1001
+    bytes_to_be_added[12]=(next_constant+20) & 0xff
+    bytes_to_be_added[13]=(next_constant+20) & 0xff
+    bytes_to_be_added[14]= (next_constant+20) & 0xff
+    bytes_to_be_added[15]=(next_constant+20) & 0xff
 
     for byte in bytes_to_be_added:
         final_byte_array.append(byte)          # Escreve a inicialização da memória.
