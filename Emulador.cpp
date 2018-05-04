@@ -274,62 +274,65 @@ void exibe_processo(){
 
 void binario(void *valor, int tipo){
 	printf("  ");
-	if(tipo == 1){
-		printf(" ");
-		byte aux;
-		byte* valorAux = (byte*)valor;
+	switch (tipo) {
+		case 1: {
+			printf(" ");
+			byte aux;
+			byte* valorAux = (byte*)valor;
+				
+			for(int i = 3; i >= 0; i--){
+				aux = *(valorAux + i);
+				for(int j = 0; j < 8; j++){
+					printf("%d", (aux >> 7) & 0b1);
+					aux = aux << 1;
+				}
+				printf(" ");
+			}
+		}
+		break;
+
+		case 2: {
+			byte aux;
 			
-		for(int i = 3; i >= 0; i--){
-			aux = *(valorAux + i);
+			aux = *((byte*)(valor));
 			for(int j = 0; j < 8; j++){
 				printf("%d", (aux >> 7) & 0b1);
 				aux = aux << 1;
 			}
-			printf(" ");
 		}
-	}
-
-	else if(tipo == 2){
-
-		byte aux;
+		break;
 		
-		aux = *((byte*)(valor));
-		for(int j = 0; j < 8; j++){
-			printf("%d", (aux >> 7) & 0b1);
-			aux = aux << 1;
+		case 3: {
+			palavra aux;
+			
+			aux = *((palavra*)(valor));
+			for(int j = 0; j < 32; j++){
+				printf("%d", (aux >> 31) & 0b1);
+				aux = aux << 1;
+			}
 		}
-	}
-
-	else if(tipo == 3){
-
-		palavra aux;
+		break;
 		
-		aux = *((palavra*)(valor));
-		for(int j = 0; j < 32; j++){
-			printf("%d", (aux >> 31) & 0b1);
-			aux = aux << 1;
+		case 4: {
+			microinstrucao aux;
+			
+			aux = *((microinstrucao*)(valor));
+			for(int j = 0; j < 36; j++){
+				printf("%ld", (aux >> 35) & 0b1);
+				aux = aux << 1;
+			}
 		}
-	}
+		break;
 
-	else if(tipo == 4){
-
-		microinstrucao aux;
+		case 5: {
+			byte aux;
 		
-		aux = *((microinstrucao*)(valor));
-		for(int j = 0; j < 36; j++){
-			printf("%ld", (aux >> 35) & 0b1);
-			aux = aux << 1;
+			aux = *((byte*)(valor));
+			for(int j = 0; j < 9; j++){
+				printf("%d", (aux >> 8) & 0b1);
+				aux = aux << 1;
+			}
 		}
-	}
-
-	else if(tipo == 5){
-
-		byte aux;
-		
-		aux = *((byte*)(valor));
-		for(int j = 0; j < 9; j++){
-			printf("%d", (aux >> 8) & 0b1);
-			aux = aux << 1;
-		}
+		break;
 	}
 }
