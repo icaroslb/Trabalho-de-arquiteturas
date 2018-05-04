@@ -242,9 +242,9 @@ void exibe_processo(){
 	cout << "\n   :::::::::::::::::: REGISTRADORES ::::::::::::::::::\n";
 	cout << "\n\t\t\t  BINÁRIO\t           INT";
 	cout << "\n    MAR :  ";		  binario(&MAR , 3); cout << "      " << MAR;
-	cout << "\n    MDR :  ";   	  binario(&MDR , 3); cout << "      " << MDR;
-	cout << "\n    PC  :  "; 	  binario(&PC  , 3); cout << "      " << PC;
-	cout << "\n    MBR :\t\t\t   ";binario(&MBR , 2); cout << "      " << (palavra)MBR;
+	cout << "\n    MDR :  ";   	 	  binario(&MDR , 3); cout << "      " << MDR;
+	cout << "\n    PC  :  "; 	 	  binario(&PC  , 3); cout << "      " << PC;
+	cout << "\n    MBR :\t\t\t   ";   binario(&MBR , 2); cout << "      " << (palavra)MBR;
  	cout << "\n    SP  :  ";		  binario(&SP  , 3); cout << "      " << SP;
 	cout << "\n    LV  :  ";		  binario(&LV  , 3); cout << "      " << LV;
 	cout << "\n    CPP :  ";		  binario(&CPP , 3); cout << "      " << CPP;
@@ -252,14 +252,16 @@ void exibe_processo(){
 	cout << "\n    OPC :  ";	  	  binario(&OPC , 3); cout << "      " << OPC;
 	cout << "\n    H   :  ";		  binario(&H   , 3); cout << "      " << H;
 
-	cout << "\n\n            PRÓXIMO ENDEREÇO DE MICROINSTRUÇÃO\n    MPC :\t\t\t  "; 
-								  binario(&MPC, 5); cout << "      "<< MPC;
+	cout << "\n\n            ENDEREÇO DA PRÓXIMA MICROINSTRUÇÃO";
+	cout << "\n    MPC :\t\t\t  ";	  binario(&MPC , 5); cout << "      "<< MPC;
 
-	cout << "\n\n\t            MICROINSTRUÇÃO\n"; 
-	cout << "\n\t"; binario(&mi, 4);
 	cout << "\n\n   :::::::::::::: FIM DOS REGISTRADORES ::::::::::::::\n";
 
-	cout << "\n\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+	cout << "\n\n\t            MICROINSTRUÇÃO\n"; 
+	cout << "\n        Addr    JAM    ULA         C      Mem   B";
+	cout << "\n   "; binario(&mi, 4);
+
+	cout << "\n\n\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 	cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
 	getchar();
@@ -318,6 +320,8 @@ void binario(void *valor, int tipo){
 			
 			aux = *((microinstrucao*)(valor));
 			for(int j = 0; j < 36; j++){
+				if ( j == 9 || j == 12 || j == 20 || j == 29 || j == 32) cout << "  ";
+
 				printf("%ld", (aux >> 35) & 0b1);
 				aux = aux << 1;
 			}
@@ -334,5 +338,6 @@ void binario(void *valor, int tipo){
 			}
 		}
 		break;
+
 	}
 }
