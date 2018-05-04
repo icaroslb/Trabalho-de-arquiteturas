@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
-//100000000
+
 #define TAMANHO_RAM 100000000
 
 using namespace std;
@@ -34,16 +34,16 @@ microinstrucao mi;
 //Memoria principal do emulador
 byte memoria[TAMANHO_RAM];
 
-void decodificar_microinstrucao();
-void ULA();
-void atribuir_barramentoB();
-void atribuir_registradores();
-void pular();
-void operar_memoria();
+void decodificar_microinstrucao();	//Separa a microinstrução e atribui as variáveis de apoio
+void atribuir_barramentoB();		//Envia para o barramento B o registrador solicitado na microinstrução
+void ULA();							//Realiza as operações da ULA
+void atribuir_registradores();		//Envaminha o resultado da ULA para os registradores
+void pular();						//Realiza os pulos se zero, não zero e MPC caso seja solicitado
+void operar_memoria();				//Realiza as operações FEATCH, READ E WRITE na memória
 
-void exibe_processo();
+void exibe_processo();				//Exibe as informações que são atualizadas no Emulador
 
-void carrega_microprograma();
+void carrega_microprograma();		//Lê o arquivo microprog.rom e carrega o microprograma para o armazenamento
 void carrega_programa(const char *arquivo);
 
 void binario(void *, int);
@@ -92,14 +92,9 @@ void carrega_programa(const char *arquivo){
 		fread(tam_arquivo, sizeof(byte), 4, prog);
 		memcpy(&tamanho, tam_arquivo, 4);
 
-		if (tamanho <= TAMANHO_RAM) {
-			fread(memoria, sizeof(byte), 20, prog);
-			fread(&memoria[0x0401], sizeof(byte), tamanho-20, prog);
-		} else {
-			cout << "Instale mais memória!!!\n";
-			exit(1);
-		}
-
+		fread(memoria, sizeof(byte), 20, prog);
+		fread(&memoria[0x0401], sizeof(byte), tamanho-20, prog);
+	
 		fclose(prog);
 
 	}
@@ -199,55 +194,73 @@ void operar_memoria(){
 
 	if(mi_memoria & 1) MBR = memoria[PC];					//FEATCH
 	if(mi_memoria & 2) memcpy(&MDR, &memoria[MAR*4], 4);	//READ
-	if(mi_memoria & 4) {									//WRITE
-		if((SP*4)+3 < TAMANHO_RAM) memcpy(&memoria[MAR*4], &MDR, 4);
-		else {
-			cout << "Instale mais memória!!!\n";
-			exit(1);
-		}	
-	}
+	if(mi_memoria & 4) memcpy(&memoria[MAR*4], &MDR, 4);	//WRITE
+
 }
 
 //Responsável por printar as informaçoes da ULA
 void exibe_processo(){
 	system("clear");
 	
-	cout << "\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-	cout << "\n  ~~~~~~~~~~~~~~    EMULADOR IJVM-1    ~~~~~~~~~~~~~";
-	cout << "\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";	
+	cout << "\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
+	cout << "\n ~~~~~~~~~~~~~~~~~    EMULADOR IJVM    ~~~~~~~~~~~~~~~~~";
+	cout << "\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";	
 	
 	int base;
 	if (LV && SP) {
 
-		cout << "\n\t-------     PILHA DE EXECUÇÃO     -------\n";
-		cout << "\n\t\tBINÁRIO\t\t        PALAVRA   INT\n";
+		cout << "\n   ---------------- PILHA DE EXECUÇÃO ----------------\n";
+		cout << "\n\t\t BINÁRIO\t\tPALAVRA   INT\n";
 		for (int i = SP; i >= LV; i--) {
 			palavra valor;
 			memcpy(&valor, &memoria[i*4], 4);
 
 			binario(&valor , 1); cout << "\t "<< i; cout << "\t  " << (int)valor; cout << "\n";
 		}
-		cout << "\n\t------- FIM DA PILHA DE EXECUÇÃO -------\n";
+		cout << "\n   ------------ FIM DA PILHA DE EXECUÇÃO -------------\n\n";
 	}
-	cout << "\n\n    :::::::::      REGISTRADORES      :::::::::\n";
-	cout << "\n\t\t\tBINÁRIO\t\t         INT";
-	cout << "\n  MAR :  ";		  binario(&MAR , 3); cout << "      " << MAR;
-	cout << "\n  MDR :  ";   	  binario(&MDR , 3); cout << "      " << MDR;
-	cout << "\n  PC  :  "; 		  binario(&PC  , 3); cout << "      " << PC;
-	cout << "\n  MBR :   \t\t\t ";binario(&MBR , 2); cout << "      " << (palavra)MBR;
- 	cout << "\n  SP  :  ";		  binario(&SP  , 3); cout << "      " << SP;
-	cout << "\n  LV  :  ";		  binario(&LV  , 3); cout << "      " << LV;
-	cout << "\n  CPP :  ";		  binario(&CPP , 3); cout << "      " << CPP;
-	cout << "\n  TOS :  ";		  binario(&TOS , 3); cout << "      " << TOS;
-	cout << "\n  OPC :  ";	  	  binario(&OPC , 3); cout << "      " << OPC;
-	cout << "\n  H   :  ";		  binario(&H   , 3); cout << "      " << H;
 
-	cout << "\n\n    :::::::::   FIM DOS REGISTRADORES  :::::::::\n";
-	cout << "\n";
-	cout << "\n\t\t  Próxima instrução\n  MPC :  "; binario(armazenamento + MPC , 4); cout << "  "<< MPC;
+	if (PC >= 1025) {
 
-	cout << "\n\n\n  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-	cout << "  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+		cout << "\n  ---------------- ÁREA DO PROGRAMA -----------------\n";
+		cout << "\n\t\t BINÁRIO        BYTE     INT     HEXA\n";
+
+		for (int i = PC-3; i <= PC+3; i++) {
+			if (i == PC) cout << "  Em execução >";
+			else cout << "\t       ";
+			
+			binario(&memoria[i], 2); 
+			cout << "\t"<< i; 
+			cout << "\t " << (int)memoria[i];
+			cout << "\t ";
+			printf("0x%02X", memoria[i]); 
+			cout << "\n";
+		}
+		cout << "\n  ------------- FIM DA ÁREA DO PROGRAMA --------------\n\n";
+	}
+
+	cout << "\n   :::::::::::::::::: REGISTRADORES ::::::::::::::::::\n";
+	cout << "\n\t\t\t  BINÁRIO\t           INT";
+	cout << "\n    MAR :  ";		  binario(&MAR , 3); cout << "      " << MAR;
+	cout << "\n    MDR :  ";   	  binario(&MDR , 3); cout << "      " << MDR;
+	cout << "\n    PC  :  "; 	  binario(&PC  , 3); cout << "      " << PC;
+	cout << "\n    MBR :\t\t\t   ";binario(&MBR , 2); cout << "      " << (palavra)MBR;
+ 	cout << "\n    SP  :  ";		  binario(&SP  , 3); cout << "      " << SP;
+	cout << "\n    LV  :  ";		  binario(&LV  , 3); cout << "      " << LV;
+	cout << "\n    CPP :  ";		  binario(&CPP , 3); cout << "      " << CPP;
+	cout << "\n    TOS :  ";		  binario(&TOS , 3); cout << "      " << TOS;
+	cout << "\n    OPC :  ";	  	  binario(&OPC , 3); cout << "      " << OPC;
+	cout << "\n    H   :  ";		  binario(&H   , 3); cout << "      " << H;
+
+	cout << "\n\n            PRÓXIMO ENDEREÇO DE MICROINSTRUÇÃO\n    MPC :\t\t\t  "; 
+								  binario(&MPC, 5); cout << "      "<< MPC;
+
+	cout << "\n\n\t            MICROINSTRUÇÃO\n"; 
+	cout << "\n\t"; binario(&mi, 4);
+	cout << "\n\n   :::::::::::::: FIM DOS REGISTRADORES ::::::::::::::\n";
+
+	cout << "\n\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+	cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
 
 	getchar();
 }
@@ -260,9 +273,9 @@ void exibe_processo(){
 //tipo 4: Imprime o binário de uma microinstrução
 
 void binario(void *valor, int tipo){
-	
 	printf("  ");
 	if(tipo == 1){
+		printf(" ");
 		byte aux;
 		byte* valorAux = (byte*)valor;
 			
@@ -277,6 +290,7 @@ void binario(void *valor, int tipo){
 	}
 
 	else if(tipo == 2){
+
 		byte aux;
 		
 		aux = *((byte*)(valor));
@@ -287,6 +301,7 @@ void binario(void *valor, int tipo){
 	}
 
 	else if(tipo == 3){
+
 		palavra aux;
 		
 		aux = *((palavra*)(valor));
@@ -297,11 +312,23 @@ void binario(void *valor, int tipo){
 	}
 
 	else if(tipo == 4){
+
 		microinstrucao aux;
 		
 		aux = *((microinstrucao*)(valor));
 		for(int j = 0; j < 36; j++){
 			printf("%ld", (aux >> 35) & 0b1);
+			aux = aux << 1;
+		}
+	}
+
+	else if(tipo == 5){
+
+		byte aux;
+		
+		aux = *((byte*)(valor));
+		for(int j = 0; j < 9; j++){
+			printf("%d", (aux >> 8) & 0b1);
 			aux = aux << 1;
 		}
 	}
