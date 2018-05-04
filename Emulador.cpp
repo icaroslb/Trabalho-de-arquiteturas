@@ -208,8 +208,7 @@ void exibe_processo(){
 	
 	int base;
 	if (LV && SP) {
-
-		cout << "\n   ---------------- PILHA DE EXECUÇÃO ----------------\n";
+		cout << "\n   ---------------- PILHA DE OPERANDOS ---------------\n";
 		cout << "\n\t\t BINÁRIO\t\tPALAVRA   INT\n";
 		for (int i = SP; i >= LV; i--) {
 			palavra valor;
@@ -217,12 +216,12 @@ void exibe_processo(){
 
 			binario(&valor , 1); cout << "\t "<< i; cout << "\t  " << (int)valor; cout << "\n";
 		}
-		cout << "\n   ------------ FIM DA PILHA DE EXECUÇÃO -------------\n\n";
+		cout << "\n   ------------ FIM DA PILHA DE OPERANDOS ------------\n\n";
 	}
 
 	if (PC >= 1025) {
 
-		cout << "\n  ---------------- ÁREA DO PROGRAMA -----------------\n";
+		cout << "\n   --------------- ÁREA DO PROGRAMA -----------------\n";
 		cout << "\n\t\t BINÁRIO        BYTE     INT     HEXA\n";
 
 		for (int i = PC-3; i <= PC+3; i++) {
@@ -236,7 +235,7 @@ void exibe_processo(){
 			printf("0x%02X", memoria[i]); 
 			cout << "\n";
 		}
-		cout << "\n  ------------- FIM DA ÁREA DO PROGRAMA --------------\n\n";
+		cout << "\n   ------------ FIM DA ÁREA DO PROGRAMA --------------\n\n";
 	}
 
 	cout << "\n   :::::::::::::::::: REGISTRADORES ::::::::::::::::::\n";
@@ -273,6 +272,7 @@ void exibe_processo(){
 //tipo 2: Imprime o binário de apenas um byte
 //tipo 3: Imprime o binário de uma palavra
 //tipo 4: Imprime o binário de uma microinstrução
+//tipo 5: Imprime os 9 bits do MPC
 
 void binario(void *valor, int tipo){
 	printf("  ");
@@ -317,7 +317,7 @@ void binario(void *valor, int tipo){
 		
 		case 4: {
 			microinstrucao aux;
-			
+		
 			aux = *((microinstrucao*)(valor));
 			for(int j = 0; j < 36; j++){
 				if ( j == 9 || j == 12 || j == 20 || j == 29 || j == 32) cout << "  ";
@@ -329,11 +329,11 @@ void binario(void *valor, int tipo){
 		break;
 
 		case 5: {
-			byte aux;
+			palavra aux;
 		
-			aux = *((byte*)(valor));
+			aux = *((palavra*)(valor)) << 23;
 			for(int j = 0; j < 9; j++){
-				printf("%d", (aux >> 8) & 0b1);
+				printf("%d", (aux >> 31) & 0b1);
 				aux = aux << 1;
 			}
 		}
