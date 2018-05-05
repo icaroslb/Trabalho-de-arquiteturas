@@ -53,9 +53,8 @@ int main(int argc, const char *argv[]){
 	carrega_programa(argv[1]);
 
 	while(true){
-		mi = armazenamento[MPC];
-
 		exibe_processo();
+		mi = armazenamento[MPC];
 
 		//Conjunto de operações realizadas
 		decodificar_microinstrucao();
@@ -201,45 +200,55 @@ void operar_memoria(){
 //Responsável por printar as informaçoes da ULA
 void exibe_processo(){
 	system("clear");
-	
-	cout << "\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~";
-	cout << "\n ~~~~~~~~~~~~~~~~~    EMULADOR IJVM    ~~~~~~~~~~~~~~~~~";
-	cout << "\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n\n";	
+
+	cout << "\n ███████████████████████████████████████████████████████";	
+	cout << "\n ███████████████████  EMULADOR IJVM  ███████████████████";
+	cout << "\n ███████████████████████████████████████████████████████\n";	
 	
 	int base;
 	if (LV && SP) {
-		cout << "\n   ---------------- PILHA DE OPERANDOS ---------------\n";
-		cout << "\n\t\t BINÁRIO\t\tPALAVRA   INT\n";
+		cout << "\n                  ╔════════════════════╗";
+		cout << "\n   ═══════════════╣ PILHA DE OPERANDOS ╠═════════════";
+		cout << "\n                  ╚════════════════════╝";
+		cout << "\n\t\t\t\t       ENDEREÇO";
+		cout << "\n\t\t BINÁRIO\t\t  DE      INT";
+		cout << "\n\t\t        \t\tPALAVRA\n";
 		for (int i = SP; i >= LV; i--) {
 			palavra valor;
 			memcpy(&valor, &memoria[i*4], 4);
 
 			binario(&valor , 1); cout << "\t "<< i; cout << "\t  " << (int)valor; cout << "\n";
 		}
-		cout << "\n   ------------ FIM DA PILHA DE OPERANDOS ------------\n\n";
+		cout << "\n   ══════════════════════════════════════════════════\n";
+
 	}
 
 	if (PC >= 1025) {
-
-		cout << "\n   --------------- ÁREA DO PROGRAMA -----------------\n";
-		cout << "\n\t\t BINÁRIO        BYTE     INT     HEXA\n";
+		cout << "\n                  ┌──────────────────┐";
+		cout << "\n   ───────────────┤ ÁREA DO PROGRAMA ├───────────────";
+		cout << "\n                  └──────────────────┘";
+		cout << "\n\t\t                       ENDEREÇO";
+		cout << "\n\t\t BINÁRIO        HEXA      DE      INT";
+		cout << "\n\t\t                         BYTE\n";
 
 		for (int i = PC-3; i <= PC+3; i++) {
-			if (i == PC) cout << "  Em execução >";
+			if (i == PC) cout << "  Em execução ►";
 			else cout << "\t       ";
 			
-			binario(&memoria[i], 2); 
-			cout << "\t"<< i; 
-			cout << "\t " << (int)memoria[i];
-			cout << "\t ";
-			printf("0x%02X", memoria[i]); 
+			binario(&memoria[i], 2);
+			printf("\t0x%02X", memoria[i]); 
+			cout << "\t "<< i; 
+			cout << "\t  " << (int)memoria[i];
 			cout << "\n";
 		}
-		cout << "\n   ------------ FIM DA ÁREA DO PROGRAMA --------------\n\n";
+
+		cout << "\n   ───────────────────────────────────────────────────\n";
 	}
 
-	cout << "\n   :::::::::::::::::: REGISTRADORES ::::::::::::::::::\n";
-	cout << "\n\t\t\t  BINÁRIO\t           INT";
+	cout << "\n                   █▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀█";
+	cout << "\n   ■■■■■■■■■■■■■■■■█  REGISTRADORES  █■■■■■■■■■■■■■■■■";
+	cout << "\n                   █▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄█";
+	cout << "\n\n\t\t\t  BINÁRIO\t           INT\n";
 	cout << "\n    MAR :  ";		  binario(&MAR , 3); cout << "      " << MAR;
 	cout << "\n    MDR :  ";   	 	  binario(&MDR , 3); cout << "      " << MDR;
 	cout << "\n    PC  :  "; 	 	  binario(&PC  , 3); cout << "      " << PC;
@@ -254,14 +263,14 @@ void exibe_processo(){
 	cout << "\n\n            ENDEREÇO DA PRÓXIMA MICROINSTRUÇÃO";
 	cout << "\n    MPC :\t\t\t  ";	  binario(&MPC , 5); cout << "      "<< MPC;
 
-	cout << "\n\n   :::::::::::::: FIM DOS REGISTRADORES ::::::::::::::\n";
+	cout << "\n\n   ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■\n";
 
-	cout << "\n\n\t            MICROINSTRUÇÃO\n"; 
+	cout << "\n              ◄♦♦♦ MICROINSTRUÇÃO ATUAL ♦♦♦►\n";  
 	cout << "\n        Addr    JAM    ULA         C      Mem   B";
 	cout << "\n   "; binario(&mi, 4);
 
-	cout << "\n\n\n ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
-	cout << " ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n";
+	cout << "\n\n\n ███████████████████████████████████████████████████████\n";
+	cout << " ███████████████████████████████████████████████████████  ";
 
 	getchar();
 }
