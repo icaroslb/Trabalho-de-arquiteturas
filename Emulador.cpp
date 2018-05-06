@@ -2,9 +2,10 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
-#include <fstream>
 
 #define TAMANHO_RAM 100000000
+#define TRUE 1
+#define FALSE 0
 
 using namespace std;
 
@@ -18,7 +19,7 @@ byte MBR = 0; 						//ACESSO MEMÓRIA
 palavra SP = 0, LV = 0, CPP = 0, TOS = 0, OPC = 0, H = 0;//OPERAÇÃO NA ULA
 
 //Barramentos
-palavra bA, bB, bC;
+palavra bB, bC;
 
 //Informações para o desclocador
 byte zero = 0, nzero = 0; 
@@ -44,9 +45,9 @@ void operar_memoria();				//Realiza as operações FEATCH, READ E WRITE na memó
 void exibe_processo();				//Exibe as informações que são atualizadas no Emulador
 
 void carrega_microprograma();		//Lê o arquivo microprog.rom e carrega o microprograma para o armazenamento
-void carrega_programa(const char *arquivo);
+void carrega_programa(const char *arquivo); //Lê o arquivo passado como argumento e carrega o programa na memória
 
-void binario(void *, int);
+void binario(void *valor, int tipo); //Mostra os valores em binário
 
 int main(int argc, const char *argv[]){
 	carrega_microprograma();
@@ -54,6 +55,7 @@ int main(int argc, const char *argv[]){
 
 	while(true){
 		exibe_processo();
+		//Atualiza a microinstrução atual
 		mi = armazenamento[MPC];
 
 		//Conjunto de operações realizadas
@@ -88,10 +90,14 @@ void carrega_programa(const char *arquivo){
 	prog = fopen(arquivo, "rb");
 	
 	if (prog != NULL) {
+		//Carrega os primeiros 4 bytes que contém o tamanho do arquivo para um vetor e depois carrega esse vetor na variável tamanho.
 		fread(tam_arquivo, sizeof(byte), 4, prog);
 		memcpy(&tamanho, tam_arquivo, 4);
 
+		//Carrega os 20 primeiros bytes que contém a inicialização do programa para os primeiros 20 bytes da memória
 		fread(memoria, sizeof(byte), 20, prog);
+
+		//Carrega o programa na memória a partir da posição PC
 		fread(&memoria[0x0401], sizeof(byte), tamanho-20, prog);
 	
 		fclose(prog);
@@ -113,12 +119,16 @@ void decodificar_microinstrucao(){
 
 //Faz a atribuição do barramento B
 void atribuir_barramentoB(){
+	//Carrega um registrador para o barramento B
 	switch(mi_barramentoB){
 		case 0: bB = MDR;										break;
 		case 1: bB = PC;										break;
 		case 2: bB = MBR;										break;
+		//O caso 3 carrega o MBR com sinal fazendo a extensão de sinal, ou seja, copia-se o bit mais significativo do MBR para as 24 posições mais significativas do barramento B.
 		case 3: bB = MBR;
-			if(MBR & (0b1 << 7)) bB = bB | (0b11111111 << 8);	break;
+			if(MBR & (0b10000000))
+				bB = bB | (0b111111111111111111111111 << 8);	
+																break;
 		case 4: bB = SP;										break;
 		case 5: bB = LV;										break;
 		case 6: bB = CPP;										break;
@@ -131,28 +141,33 @@ void atribuir_barramentoB(){
 
 //Grava o resultado através do barramento C
 void atribuir_registradores(){
-	if(mi_gravar & 1)   MAR = bC;
-	if(mi_gravar & 2)   MDR = bC;
-	if(mi_gravar & 4)   PC  = bC;
-	if(mi_gravar & 8)   SP  = bC;
-	if(mi_gravar & 16)  LV  = bC;
-	if(mi_gravar & 32)  CPP = bC;
-	if(mi_gravar & 64)  TOS = bC;
-	if(mi_gravar & 128) OPC = bC;
-	if(mi_gravar & 256) H   = bC;
+	//Pode atribuir vários registradores ao mesmo tempo dependendo se mi_gravar possui bit alto para o registrador correspondente
+	if(mi_gravar & 0b000000001)   MAR = bC;
+	if(mi_gravar & 0b000000010)   MDR = bC;
+	if(mi_gravar & 0b000000100)   PC  = bC;
+	if(mi_gravar & 0b000001000)   SP  = bC;
+	if(mi_gravar & 0b000010000)   LV  = bC;
+	if(mi_gravar & 0b000100000)   CPP = bC;
+	if(mi_gravar & 0b001000000)   TOS = bC;
+	if(mi_gravar & 0b010000000)   OPC = bC;
+	if(mi_gravar & 0b100000000)   H   = bC;
 }
 
 //Faz a mi_operacaoção do mi_pulo
 void pular(){
-	if(mi_pulo & 1) MPC = MPC | (zero << 8);
-	if(mi_pulo & 2) MPC = MPC | (nzero << 8);
-	if(mi_pulo & 4) MPC = MPC | MBR;
+	//Realiza o pulo se a saída da ULA for zero
+	if(mi_pulo & 0b001) MPC = MPC | (zero << 8);
+	//Realiza o pulo se a saída da ula for diferente de zero
+	if(mi_pulo & 0b010) MPC = MPC | (nzero << 8);
+	//Pula para a posição do MBR
+	if(mi_pulo & 0b100) MPC = MPC | MBR;
 
 }
 
 //Faz a mi_operacaoção da ULA
 void ULA(){
 	switch(mi_operacao){
+		//Cada operação da ULA é representado pela sequencia dos bits de operação. Cada operação válida foi convertida para inteiro para facilitar a escrita do switch
 		case 12: bC = H & bB;		break;
 		case 17: bC = 1;			break;
 		case 18: bC = -1;			break;
@@ -172,28 +187,32 @@ void ULA(){
 		default: break;
 	}
 	
-	//Verifica o resultado do zero e não zero da ULA
-	if(bC){
-		zero = 0;
-		nzero = 1;
-	}else{
-		zero = 1;
-		nzero = 0;
+	//Verifica o resultado da ula e atribui as variáveis zero e nzero
+	
+	if(bC) { //Se bC for diferente de zero
+		zero = FALSE;
+		nzero = TRUE;
+	} else { //Se bC for igual a zero
+		zero = TRUE;
+		nzero = FALSE;
 	}
 	
 	//Faz o deslocamento do mi_deslocador
 	switch(mi_deslocador){
+		//Faz o deslocamento em um bit para direita
 		case 1: bC = bC >> 1;		break;
+		//Faz o deslocamento em 8 bits para a esquerda
 		case 2: bC = bC << 8;		break;
 	}
 }
 
 //Operações Fetch, Read, Write da memória
 void operar_memoria(){
-
-	if(mi_memoria & 1) MBR = memoria[PC];					//FEATCH
-	if(mi_memoria & 2) memcpy(&MDR, &memoria[MAR*4], 4);	//READ
-	if(mi_memoria & 4) memcpy(&memoria[MAR*4], &MDR, 4);	//WRITE
+	if(mi_memoria & 0b001) MBR = memoria[PC];					//FEATCH
+	//MDR recebe os 4 bytes referente a palavra MAR 
+	if(mi_memoria & 0b010) memcpy(&MDR, &memoria[MAR*4], 4);	//READ
+	//Os 4 bytes na memória da palavra MAR recebem o valor de MDR
+	if(mi_memoria & 0b100) memcpy(&memoria[MAR*4], &MDR, 4);	//WRITE
 
 }
 
@@ -201,11 +220,13 @@ void operar_memoria(){
 void exibe_processo(){
 	system("clear");
 
-	cout << " ███████████████████████████████████████████████████████";	
+	cout <<   " ███████████████████████████████████████████████████████";	
 	cout << "\n ███████████████████  EMULADOR IJVM  ███████████████████";
 	cout << "\n ███████████████████████████████████████████████████████\n";	
 	
 	int base;
+
+	//Exibe a pilha de operandos quando o emulador já realizou a inicialização
 	if (LV && SP) {
 		cout << "\n                  ╔════════════════════╗";
 		cout << "\n   ═══════════════╣ PILHA DE OPERANDOS ╠═════════════";
@@ -213,6 +234,8 @@ void exibe_processo(){
 		cout << "\n\t\t\t\t       ENDEREÇO";
 		cout << "\n\t\t BINÁRIO\t\t  DE      INT";
 		cout << "\n\t\t        \t\tPALAVRA\n";
+
+		//Exibe a área delimitada por SP e LV para mostrar a pilha de operandos
 		for (int i = SP; i >= LV; i--) {
 			palavra valor;
 			memcpy(&valor, &memoria[i*4], 4);
@@ -223,7 +246,8 @@ void exibe_processo(){
 
 	}
 
-	if (PC >= 1025) {
+	//Exibe a área do programa quando o Emulador já realizou a inicialização
+	if (PC >= 0x0401) {
 		cout << "\n                  ╭──────────────────╮";
 		cout << "\n   ───────────────┤ ÁREA DO PROGRAMA ├───────────────";
 		cout << "\n                  ╰──────────────────╯";
@@ -231,7 +255,9 @@ void exibe_processo(){
 		cout << "\n\t\t BINÁRIO        HEXA      DE      INT";
 		cout << "\n\t\t                         BYTE\n";
 
-		for (int i = PC-3; i <= PC+3; i++) {
+		//Exibe a área ao redor de PC para mostrar trechos do programa 
+		//que o Emulador está executando no momento
+		for (int i = PC-2; i <= PC+3; i++) {
 			if (i == PC) cout << "  Em execução ►";
 			else cout << "\t       ";
 			
@@ -245,6 +271,7 @@ void exibe_processo(){
 		cout << "   ───────────────────────────────────────────────────\n";
 	}
 
+	//Exibe os registradores
 	cout << "\n                   ▄■■■■■■■■■■■■■■■■■▄";
 	cout << "\n   ■■■■■■■■■■■■■■■█   REGISTRADORES   █■■■■■■■■■■■■■■■■";
 	cout << "\n                   ▀■■■■■■■■■■■■■■■■■▀";
@@ -265,6 +292,7 @@ void exibe_processo(){
 
 	cout << "\n   ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■\n";
 
+	//Exibe a microinstrução que a ula está operando atualmente
 	cout << "\n              ◄♦♦♦ MICROINSTRUÇÃO ATUAL ♦♦♦►";  
 	cout << "\n        Addr    JAM    ULA         C      Mem   B";
 	cout << "\n   "; binario(&mi, 4);
