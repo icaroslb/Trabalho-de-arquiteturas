@@ -145,23 +145,28 @@ def is_valid_operand(instruction, operand, operand_types, number_of_operands):
     if number_of_operands == len(operand):
         if number_of_operands == 0:
             return True
+
+        check = True
         
         for i in range (0, number_of_operands, 1):
             
             if operand_types[i] == 'varnum':
-                
-                return operand[i] in variables_dict.keys()
+                if operand[i] not in variables_dict:
+                    check = False
 
             elif operand_types[i] == 'new_varnum':
-                
-                return is_valid_variable(operand[i])
+                if not is_valid_variable(operand[i]):
+                    check = False
 
             elif (operand_types[i] == 'byte') or (operand_types[i] == 'const') or (operand_types[i] == 'disp') or (operand_types[i] == 'index'):
-                return operand[i].isnumeric()
+                if not operand[i].isnumeric():
+                    check = False
 
             else:  # operand_types[i] == 'offset':
-                
-                return is_label(operand[i])
+                if not is_label(operand[i]):
+                    check = False
+
+        return check
     
     else:
         return False
@@ -202,7 +207,7 @@ def add_error(error_type, error_line):
     global error_log
 
     if (str(error_line) not in error_log):
-        error_to_be_added = 'Line: ' + format(error_line, '#02d') + ' error: ' + str(error_type) + '\n'
+        error_to_be_added = 'Line ' + format(error_line, '#02d') + ' error: ' + str(error_type) + '\n'
         error_log = error_log + error_to_be_added
 
 def generate_file():
