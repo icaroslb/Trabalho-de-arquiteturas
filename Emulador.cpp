@@ -121,20 +121,19 @@ void decodificar_microinstrucao(){
 void atribuir_barramentoB(){
 	//Carrega um registrador para o barramento B
 	switch(mi_barramentoB){
-		case 0: bB = MDR;										break;
-		case 1: bB = PC;										break;
-		case 2: bB = MBR;										break;
+		case 0: bB = MDR;				break;
+		case 1: bB = PC;				break;
 		//O caso 3 carrega o MBR com sinal fazendo a extensão de sinal, ou seja, copia-se o bit mais significativo do MBR para as 24 posições mais significativas do barramento B.
-		case 3: bB = MBR;
+		case 2: bB = MBR;
 			if(MBR & (0b10000000))
-				bB = bB | (0b111111111111111111111111 << 8);	
-																break;
-		case 4: bB = SP;										break;
-		case 5: bB = LV;										break;
-		case 6: bB = CPP;										break;
-		case 7: bB = TOS;										break;
-		case 8: bB = OPC;										break;
-		default: bB = -1;										break;
+					bB = bB | (0b111111111111111111111111 << 8);									break;
+		case 3: bB = MBR;				break;
+		case 4: bB = SP;				break;
+		case 5: bB = LV;				break;
+		case 6: bB = CPP;				break;
+		case 7: bB = TOS;				break;
+		case 8: bB = OPC;				break;
+		default: bB = -1;				break;
 	}
 	
 }
@@ -219,10 +218,9 @@ void operar_memoria(){
 //Responsável por printar as informaçoes da ULA
 void exibe_processo(){
 	system("clear");
-
-	cout <<   " ███████████████████████████████████████████████████████";	
-	cout << "\n ███████████████████  EMULADOR IJVM  ███████████████████";
-	cout << "\n ███████████████████████████████████████████████████████\n";	
+	
+	cout << "\n ██ █ █ █ █ █ █ █ ██  EMULADOR IJVM  ██ █ █ █ █ █ █ █ ██";
+	cout << "\n";	
 	
 	int base;
 
@@ -242,7 +240,7 @@ void exibe_processo(){
 
 			binario(&valor , 1); cout << "\t "<< i; cout << "\t  " << (int)valor; cout << "\n";
 		}
-		cout << "   ══════════════════════════════════════════════════\n";
+		cout << "   ══════════════════════════════════════════════════";
 
 	}
 
@@ -268,7 +266,7 @@ void exibe_processo(){
 			cout << "\n";
 		}
 
-		cout << "   ───────────────────────────────────────────────────\n";
+		cout << "   ───────────────────────────────────────────────────";
 	}
 
 	//Exibe os registradores
@@ -297,8 +295,7 @@ void exibe_processo(){
 	cout << "\n        Addr    JAM    ULA         C      Mem   B";
 	cout << "\n   "; binario(&mi, 4);
 
-	cout << "\n\n ███████████████████████████████████████████████████████\n";
-	cout << " ███████████████████████████████████████████████████████  ";
+	cout << "\n\n ██ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ ██\n";
 
 	getchar();
 }
