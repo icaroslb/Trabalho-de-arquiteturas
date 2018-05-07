@@ -228,22 +228,26 @@ def generate_file():
                             0x0400,
                             0x1001 + len(variables_dict.keys())
                         ]
+    try: #Tenta gerar o arquivo
+        for byte in bytes_to_be_added:
+            final_byte_array += byte.to_bytes(4, byteorder = 'little', signed = True)
+  
+        # Bytes das instruções, operandos e labels
+        for byte in byte_list:
+            if type(byte) is list:                                     # Verifica se é label
+                if byte[0] not in labels_dict.keys():                  # Verifica se a label existe
+                        add_error('label_not_found', line_counter)
+                    
+                else:
+                    label_byte = labels_dict[byte[0]] - byte[1] 
+                    final_byte_array += label_byte.to_bytes(2, byteorder = 'big', signed = True)
 
-    for byte in bytes_to_be_added:
-        final_byte_array += byte.to_bytes(4, byteorder = 'little', signed = True)
-   
-    # Bytes das instruções, operandos e labels
-    for byte in byte_list:
-        if type(byte) is list:                                     # Verifica se é label
-            if byte[0] not in labels_dict.keys():                  # Verifica se a label existe
-                    add_error('label_not_found', line_counter)
-                
             else:
-                label_byte = labels_dict[byte[0]] - byte[1] 
-                final_byte_array += label_byte.to_bytes(2, byteorder = 'big', signed = True)
+                final_byte_array.append(byte)
 
-        else:
-            final_byte_array.append(byte)
+    except Exception:
+        print("Erro ao gerar o arquivo")
+        print(error_log)
 
     final_program = open(sys.argv[1][:-4] + '.exe', 'wb')
     final_program.write(final_byte_array)
