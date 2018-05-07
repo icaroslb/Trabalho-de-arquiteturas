@@ -220,22 +220,27 @@ def gerar_arquivo():
                             0x0400,
                             0x1001 + len(dicionario_variaveis.keys())
                         ]
+    try: #Tenta gerar o arquivo
+        
+        for byte in bytes_inicializacao:
+            byte_array_final += byte.to_bytes(4, byteorder = 'little', signed = True)
+    
+        # Bytes das instruções, operandos e labels
+        for byte in lista_byte:
+            if type(byte) is list: # Verifica se é label
+                if byte[0] not in dicionario_labels.keys(): # Verifica se a label existe
+                        adicionar_erro('Label não encontrada', contador_linha)
+                    
+                else:
+                    label_byte = dicionario_labels[byte[0]] - byte[1] 
+                    byte_array_final += label_byte.to_bytes(2, byteorder = 'big', signed = True)
 
-    for byte in bytes_inicializacao:
-        byte_array_final += byte.to_bytes(4, byteorder = 'little', signed = True)
-   
-    # Bytes das instruções, operandos e labels
-    for byte in lista_byte:
-        if type(byte) is list: # Verifica se é label
-            if byte[0] not in dicionario_labels.keys(): # Verifica se a label existe
-                    adicionar_erro('Label não encontrada', contador_linha)
-                
             else:
-                label_byte = dicionario_labels[byte[0]] - byte[1] 
-                byte_array_final += label_byte.to_bytes(2, byteorder = 'big', signed = True)
-
-        else:
-            byte_array_final.append(byte)
+                byte_array_final.append(byte)
+   
+    except Exception:
+        print("Erro ao gerar o arquivo")
+        print(log_erro)
 
     final_programa = open(sys.argv[1][:-4] + '.exe', 'wb')
     final_programa.write(byte_array_final)
