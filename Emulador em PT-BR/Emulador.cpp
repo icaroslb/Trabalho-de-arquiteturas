@@ -2,6 +2,7 @@
 #include <cstring>
 #include <cstdio>
 #include <cstdlib>
+#include "cores.h"
 
 #define TAMANHO_RAM 100000000
 #define TRUE 1
@@ -116,7 +117,7 @@ void carrega_programa(const char *arquivo){
 //Onde será feita a separação da microinstrução e as mi_operacaoções
 void decodificar_microinstrucao(){
 
-	mi_barramentoB  = MIR 		  & 0b1111;		//Qual dos registradores será usado no barramento B
+	mi_barramentoB  =  MIR 		  & 0b1111;		//Qual dos registradores será usado no barramento B
 	mi_memoria 		= (MIR >> 4)  & 0b111;		//Qual operação será feita com a memoria principal
 	mi_gravar 		= (MIR >> 7)  & 0b111111111;//Qual dos registradores será gravado o barramento C
 	mi_operacao 	= (MIR >> 16) & 0b111111;	//Qual a operacaoção que será feita na ULA
@@ -231,61 +232,72 @@ void pular(){
 //ÁREA RESPONSÁVEL POR PRINTAR AS INFORMAÇÕES DA ULA//
 void exibe_processo(){
 	system("clear");
-	
+	cout << COR_AMARELO;
 	cout << "\n ██ █ █ █ █ █ █ █ ██  EMULADOR IJVM  ██ █ █ █ █ █ █ █ ██";
 	cout << "\n";	
 	
-	int base;
 
 	//Exibe a pilha de operandos quando o emulador já realizou a inicialização
-	if (LV && SP) {
-		cout << "\n                  ╔════════════════════╗";
-		cout << "\n   ═══════════════╣ PILHA DE OPERANDOS ╠═════════════";
-		cout << "\n                  ╚════════════════════╝";
+	if (LV && SP) { cout << COR_VERDE;
+		cout << "\n                  ╭────────────────────╮";
+		cout << "\n   ───────────────┤ PILHA DE OPERANDOS ├─────────────";
+		cout << "\n                  ╰────────────────────╯";
+
+		cout << COR_CIANO;
 		cout << "\n\t\t\t\t       ENDEREÇO";
 		cout << "\n\t\t BINÁRIO\t\t  DE      INT";
 		cout << "\n\t\t        \t\tPALAVRA\n";
 
 		//Exibe a área delimitada por SP e LV para mostrar a pilha de operandos
+		cout << COR_BRANCO;
 		for (int i = SP; i >= LV; i--) {
 			palavra valor;
 			memcpy(&valor, &memoria[i*4], 4);
 
 			binario(&valor , 1); cout << "\t "<< i; cout << "\t  " << (int)valor; cout << "\n";
 		}
-		cout << "   ══════════════════════════════════════════════════";
+		cout << COR_VERDE;
+		cout << "   ───────────────────────────────────────────────────";
 
 	}
 
 	//Exibe a área do programa quando o Emulador já realizou a inicialização
 	if (PC >= 0x0401) {
+		cout << COR_AZUL;
 		cout << "\n                  ╭──────────────────╮";
 		cout << "\n   ───────────────┤ ÁREA DO PROGRAMA ├───────────────";
 		cout << "\n                  ╰──────────────────╯";
+		cout << COR_CIANO;
 		cout << "\n\t\t                       ENDEREÇO";
 		cout << "\n\t\t BINÁRIO        HEXA      DE      INT";
 		cout << "\n\t\t                         BYTE\n";
+		cout << COR_BRANCO;
 
 		//Exibe a área ao redor de PC para mostrar trechos do programa que o Emulador está executando no momento
 		for (int i = PC-2; i <= PC+3; i++) {
+			cout << COR_VERMELHO;
 			if (i == PC) cout << "  Em execução ►";
 			else cout << "\t       ";
-			
+			cout << COR_BRANCO;
 			binario(&memoria[i], 2);
 			printf("\t0x%02X", memoria[i]); 
 			cout << "\t "<< i; 
 			cout << "\t  " << (int)memoria[i];
 			cout << "\n";
 		}
-
+		cout << COR_AZUL;
 		cout << "   ───────────────────────────────────────────────────";
 	}
 
 	//Exibe os registradores
-	cout << "\n                   ▄■■■■■■■■■■■■■■■■■▄";
-	cout << "\n   ■■■■■■■■■■■■■■■█   REGISTRADORES   █■■■■■■■■■■■■■■■■";
-	cout << "\n                   ▀■■■■■■■■■■■■■■■■■▀";
+	cout << COR_MAGENTA;
+	cout << "\n                  ╔═══════════════════╗";
+	cout << "\n   ═══════════════╣   REGISTRADORES   ╠════════════════";
+	cout << "\n                  ╚═══════════════════╝";
+
+	cout << COR_CIANO;;
 	cout << "\n\n\t\t\t  BINÁRIO\t           INT\n";
+	cout << COR_BRANCO;
 	cout << "\n    MAR :  ";		  binario(&MAR , 3); cout << "      " << MAR;
 	cout << "\n    MDR :  ";   	 	  binario(&MDR , 3); cout << "      " << MDR;
 	cout << "\n    PC  :  "; 	 	  binario(&PC  , 3); cout << "      " << PC;
@@ -296,18 +308,24 @@ void exibe_processo(){
 	cout << "\n    TOS :  ";		  binario(&TOS , 3); cout << "      " << TOS;
 	cout << "\n    OPC :  ";	  	  binario(&OPC , 3); cout << "      " << OPC;
 	cout << "\n    H   :  ";		  binario(&H   , 3); cout << "      " << H;
-
+	cout << COR_CIANO;
 	cout << "\n\n            ENDEREÇO DA PRÓXIMA MICROINSTRUÇÃO";
+	cout << COR_BRANCO;
 	cout << "\n    MPC :\t\t\t  ";	  binario(&MPC , 5); cout << "      "<< MPC;
-
-	cout << "\n   ■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■■\n";
+	cout <<COR_MAGENTA;
+	cout << "\n   ══════════════════════════════════════════════════";
+	cout << COR_NORMAL;
 
 	//Exibe a microinstrução que a ula está operando atualmente
-	cout << "\n              ◄♦♦♦ MICROINSTRUÇÃO ATUAL ♦♦♦►";  
+	cout << COR_VERMELHO;
+	cout << "\n              ◄♦♦♦  ";cout << COR_BRANCO; cout << "MICROINSTRUÇÃO ATUAL"; cout << COR_VERMELHO; cout <<" ♦♦♦►";  
+	cout << COR_CIANO;
 	cout << "\n        Addr    JAM    ULA         C      Mem   B";
+	cout << COR_BRANCO;
 	cout << "\n   "; binario(&MIR, 4);
-
+	cout << COR_AMARELO;
 	cout << "\n\n ██ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ █ ██\n";
+	cout << COR_NORMAL;
 
 	getchar();
 }
