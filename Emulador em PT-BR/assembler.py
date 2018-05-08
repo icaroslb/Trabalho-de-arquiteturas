@@ -6,36 +6,37 @@ import sys
 """
 
 dicionario_instrucoes = {
-                        'nop':                  [0x01, []],
-                        'iadd':                 [0x02, []],
-                        'isub':                 [0x05, []],
-                        'iand':                 [0x08, []],
-                        'ior':                  [0x0b, []],
-                        'dup':                  [0x0e, []],
-                        'pop':                  [0x10, []],
-                        'swap':                 [0x13, []],
-                        'bipush':               [0x19, ['byte']],
-                        'iload':                [0x1c, ['varnum']],
-                        'istore':               [0x22, ['new_varnum']],
-                        'wide':                 [0x28, []],
-                        'ldc_w':                [0x32, ['index']], 
-                        'iinc':                 [0x36, ['varnum', 'const']],
-                        'goto':                 [0x3c, ['offset']],
-                        'iflt':                 [0x43, ['offset']],
-                        'ifeq':                 [0x47, ['offset']],
-                        'if_icmpeq':            [0x4b, ['offset']],
-                        'invokevirtual':        [0x55, ['disp']], 
-                        'ireturn':              [0x6b, []]
+                        'nop':           [0x01, []],
+                        'iadd':          [0x02, []],
+                        'isub':          [0x05, []],
+                        'iand':          [0x08, []],
+                        'ior':           [0x0b, []],
+                        'dup':           [0x0e, []],
+                        'pop':           [0x10, []],
+                        'swap':          [0x13, []],
+                        'bipush':        [0x19, ['byte']],
+                        'iload':         [0x1c, ['varnum']],
+                        'istore':        [0x22, ['new_varnum']],
+                        'wide':          [0x28, []],
+                        'ldc_w':         [0x32, ['index']], 
+                        'iinc':          [0x36, ['varnum', 'const']],
+                        'goto':          [0x3c, ['offset']],
+                        'iflt':          [0x43, ['offset']],
+                        'ifeq':          [0x47, ['offset']],
+                        'if_icmpeq':     [0x4b, ['offset']],
+                        'invokevirtual'  [0x55, ['disp']], 
+                        'ireturn':       [0x6b, []]
                     }
 
 # Estruturas e constantes globais #
 
-dicionario_labels = {} # Dicionário que armazena as labels e o byte que cada uma indica
+dicionario_labels    = {} # Dicionário que armazena as labels e o byte que cada uma indica
 dicionario_variaveis = {} # Dicionário que armazena as variáveis e suas posições de memória
-lista_byte = [] # Lista que armazena os bytes que serão adicionados ao arquivo
-log_erro = ''   # String que armazena o log de erros
 
-contador_byte = 0  # Conta o programa byte a byte
+lista_byte = [] # Lista que armazena os bytes que serão adicionados ao arquivo
+log_erro   = '' # String que armazena o log de erros
+
+contador_byte  = 0 # Conta o programa byte a byte
 contador_linha = 0 # Conta o programa linha por linha
 
 proxima_variavel = 1 # Indica a posição de memória da pŕoxima variável a ser adicionada
@@ -43,25 +44,22 @@ proxima_variavel = 1 # Indica a posição de memória da pŕoxima variável a se
 def main():
     global contador_linha
 
-    try:
+    try: # Tenta ler o programa escrito em assembly
         programa = open(sys.argv[1], 'r')
     except:
         print('Arquivo não encontrado')
         raise IndexError
 
-    for linha in programa:
+    for linha in programa: # Percorre as linhas contidas no programa
         contador_linha += 1
 
-        s_linha = linha.lower().split() # Separa os strings em uma lista
+        s_linha = linha.lower().split() # Separa a linha em strings em coloca em uma lista
 
-        try:
-            if label(s_linha[0]): # Verifica se a linha contém uma label
-                adicionar_label(s_linha[0]) # Se sim, cria a label
-                del s_linha[0]
-        
-        except IndexError:
-            pass
-        
+
+        if label(s_linha[0]): # Verifica se a linha contém uma label
+            adicionar_label(s_linha[0]) # Se sim, cria a label
+            del s_linha[0] #Remove a label do vetor de strings
+
 
         if s_linha != [] and not comentario(s_linha[0]): # Verifica se linha vazia ou comentário
             instrucao = s_linha[0]
@@ -242,9 +240,9 @@ def gerar_arquivo():
         print("Erro ao gerar o arquivo")
         print(log_erro)
 
-    final_programa = open(sys.argv[1][:-4] + '.exe', 'wb')
-    final_programa.write(byte_array_final)
-    final_programa.close()
+    programa_final = open(sys.argv[1][:-4] + '.exe', 'wb')
+    programa_final.write(byte_array_final)
+    programa_final.close()
 
 """Executa a função main"""
 if __name__ == '__main__':
