@@ -24,7 +24,7 @@ dicionario_instrucoes = {
                         'iflt':          [0x43, ['offset']],
                         'ifeq':          [0x47, ['offset']],
                         'if_icmpeq':     [0x4b, ['offset']],
-                        'invokevirtual'  [0x55, ['disp']], 
+                        'invokevirtual': [0x55, ['disp']], 
                         'ireturn':       [0x6b, []]
                     }
 
