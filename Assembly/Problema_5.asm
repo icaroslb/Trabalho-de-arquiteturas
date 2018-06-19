@@ -18,22 +18,20 @@ MudarCor:
 	;Lê o teclado
 	mov ax, 0
 	int 0x16
-	jmp .mudarCor
-
-
-
-.mudarCor:
-	;Guarda o valor lido
-	mov dl, al
 	
+	;|
+	;|
+	;v
+
+.mudarCor:	
 	;Inicializa pra poder percorrer a tela
-	mov ax, 0
+	mov bx, 0
 	mov cx, 64000
 
 .loop:
-	mov di, ax
-	mov [es:di], dl
-	inc ax
+	mov di, bx
+	mov [es:di], al	;memVideo[di] = al  ==  (memVideo + di) = al
+	inc bx
 	dec cx
 	jz .lerTeclado	;Se pintou toda a tela
 	jmp .loop
