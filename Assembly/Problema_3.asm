@@ -1,7 +1,6 @@
 	org 0x7c00
 	bits 16
 
-	;Limpa os registradores
 	cli
 	
 	;Inicializa a quantidade de letras
@@ -36,8 +35,7 @@ EscreverAoContrario:
 	;Vai resgatando as letras guardadas
 	pop ax
 	
-	;Printa a letra guardada
-	mov ah, 0x0E
+	;Printa a letra guardada (ah já está com 0xE)
 	int 0x10
 	
 	dec cx
