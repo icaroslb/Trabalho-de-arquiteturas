@@ -2,34 +2,37 @@
 	bits 16
 
 cores:
-	cli
+	cli ;Limpa os registradores
 
+	;Inicializa a interrupção de gráfico
 	mov ax, 0
 	mov al, 0x13
 	int 0x10
-
+	
+	;Posição da VRAM
 	mov ax, 0xA000
 	mov es, ax
-
+	
 	mov dl, 0
 	push dx
 
-;inicialização de loop
+;Inicialização de loop
 .loop:
 	mov ax, 0
 	mov cx, 64000
 
-;pintar as telas
+;Pintar a tela
 .percorrer:
 	mov di, ax
 	mov [es:di], dl
 	inc ax
 	dec cx
-	jz .proxloop
+	jz .proxloop	;Se percorer toda tela 
+
 	inc dl
 	jmp .percorrer
 
-;inicializa o proximo loop
+;Inicializa o proximo loop
 .proxloop:
 	pop dx
 	inc dl
