@@ -29,8 +29,7 @@ EscreverAoContrario:
 .inverte:
 	;Primeiro faz a quebra de linha
 	mov al, 10
-	;Printa a quebra de linha
-	mov ah, 0x0E
+	;Printa a quebra de linha (ah já está com o valor 0x0E)
 	int 0x10
 	
 .loop:
