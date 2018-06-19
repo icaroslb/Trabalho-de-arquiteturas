@@ -24,7 +24,7 @@ cores:
 ;Pintar a tela
 .percorrer:
 	mov di, ax
-	mov [es:di], dl
+	mov [es:di], dl ;memVideo[di] = dl  ==  (memVideo + di) = dl
 	inc ax
 	dec cx
 	jz .proxloop	;Se percorer toda tela 
