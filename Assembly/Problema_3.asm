@@ -16,6 +16,9 @@ EscreverAoContrario:
 	mov ah, 0x0E
 	int 0x10
 	
+	cmp al, 8
+	je .apagar	;Se a tecla apertada foi backspace
+	
 	;Guarda o valor lido na pilha
 	push ax
 	inc cx
@@ -23,6 +26,22 @@ EscreverAoContrario:
 	cmp al, 13
 	je .inverte	;Se a tecla apertada foi enter
 	jmp EscreverAoContrario
+
+
+.apagar:
+	;Descarto a última letra
+	pop ax
+	
+	;Escrevo um espaço em branco no lugar e volto
+	mov al, ' '
+	int 0x10
+	mov al, 8
+	int 0x10
+	
+	;Decremento uma letra
+	dec cx
+	jmp EscreverAoContrario
+
 
 
 .inverte:
@@ -35,7 +54,7 @@ EscreverAoContrario:
 	;Vai resgatando as letras guardadas
 	pop ax
 	
-	;Printa a letra guardada (ah já está com 0xE)
+	;Printa a letra guardada (ah já está com 0x0E)
 	int 0x10
 	
 	dec cx
