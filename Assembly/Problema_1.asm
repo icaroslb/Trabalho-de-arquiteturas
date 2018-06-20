@@ -1,8 +1,8 @@
 org 0x7c00  
-	bits 16     
+bits 16     
 
-	mov ax, 0
-	mov ds, ax
+mov ax, 0
+mov ds, ax
 
 inicio:	
 	cli
@@ -26,21 +26,24 @@ inicio:
 	mov di, 0
 	mov si, 0x7e00;Onde a imagem tá salva
 	
-
-.loop3: 
-	mov cx, 0	
 .loop2:	
 	mov al, [ds:si]
 	mov [es:di], al
+
+;	EXIBIR LENTAMENTE
+	;mov ah, 0x0E
+	;mov al, 't'
+	;int 0x10
+;	FIM EXIBIR LENTAMENTE
+
+	cmp di, 16000
+	je .final
 	inc si
 	inc di
-	inc cx
-	cmp cx, 16384
-	jz .final
 	jmp .loop2
 
 .final:
-	hlt
+	jmp .final
 
-	times 510 - ($-$$) db 0
-	dw 0xaa55
+times 510 - ($-$$) db 0
+dw 0xaa55
