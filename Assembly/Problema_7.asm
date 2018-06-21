@@ -72,10 +72,12 @@ EPrimoOuNao:
 	jmp .divide
 	
 .nPrimo:
+	mov ah, 0x0E
 	mov bx, nP	;Pego o texto de não ser primo
 	jmp .loop
 	
 .ePrimo:
+	mov ah, 0x0E
 	mov bx, eP	;pego o texto de ser primo
 	jmp .loop
 	
@@ -94,8 +96,8 @@ EPrimoOuNao:
 .fim:
 	jmp EPrimoOuNao	
 	
-nP:	db " Nao e primo!", 10, 13	;Frase de não ser primo
-eP:	db " E primo!", 10, 13		;Frase de ser primo
+nP:	db " N", 134, "o ", 130, " primo!", 10, 13	;Frase de não ser primo
+eP:	db ' ',  144, " primo!", 10, 13		;Frase de ser primo
 	
 	times 510 - ($-$$) db 0
 	dw 0xAA55

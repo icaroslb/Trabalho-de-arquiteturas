@@ -16,8 +16,6 @@ fibonacci:
 	
 	dec cx
 
-
-
 .dividir:
 	;Guardo a quantidade e os valores atuais de fibonacci
 	push cx
@@ -27,7 +25,6 @@ fibonacci:
 	;Inicio a divisão
 	mov bx, 10
 	mov cx, 0
-	
 	
 .loop:	
 	mov dx, 0
