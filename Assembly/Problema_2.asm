@@ -26,13 +26,13 @@ cripitado:
 	cmp dl, 10	
 	je .retorno		;Se a matrícula acabou
 	
-.calcula:
-	sub al, dl		;Decripto diminuindo pelo valor do número atual da matrícula
-	mov ah, 0x0E
-	int 0x10		;Escrevo a letra descriptografada
-	inc si			;Vou para próximo número da matrícula
-	inc bx			;Vou para a próxima letra da frase
-	jmp .descripitar
+	.calcula:
+		sub al, dl		;Decripto diminuindo pelo valor do número atual da matrícula
+		mov ah, 0x0E
+		int 0x10		;Escrevo a letra descriptografada
+		inc si			;Vou para próximo número da matrícula
+		inc bx			;Vou para a próxima letra da frase
+		jmp .descripitar
 	
 	
 .retorno:
@@ -43,7 +43,8 @@ cripitado:
 .fim:
 	hlt
 	
-matricula: db 3, 9, 9, 0, 0, 2, 10
+;Número da matrícula do aluno cuja mensagem foi gerada terminando por 10 que indica o término da matrícula	
+matricula: db 3, 9, 7, 6, 1, 3, 10
 	
 	times 510 - ($-$$) db 0
 	dw 0xaa55

@@ -13,6 +13,7 @@ cores:
 	mov ax, 0xA000
 	mov es, ax
 	
+	;Guarda a cor inicial
 	mov dl, 0
 	push dx
 
@@ -24,7 +25,7 @@ cores:
 ;Pintar a tela
 .percorrer:
 	mov di, ax
-	mov [es:di], dl ;memVideo[di] = dl  ==  (memVideo + di) = dl
+	mov [es:di], dl ;memVideo[di] = dl  ==  *(memVideo + di) = dl
 	inc ax
 	dec cx
 	jz .proxloop	;Se percorer toda tela 

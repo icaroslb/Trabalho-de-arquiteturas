@@ -3,7 +3,7 @@
 	
 	cli
 	
-fibo:
+fibonacci:
 	;Carrego a quantidade de números, e os primeiros valores da soma de gibonacci
 	mov cx, 21
 	mov ax, 0
