@@ -34,7 +34,6 @@ cripitado:
 		inc bx			;Vou para a próxima letra da frase
 		jmp .descripitar
 	
-	
 .retorno:
 	mov si, matricula	;Reinicio a posição do número atual da matrícula
 	mov dl, [si]		;Pego o verdadeiro número atual da matrícula
