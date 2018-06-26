@@ -25,7 +25,7 @@ desenhar:
 	inc bx
 	inc di
 
-	cmp bx, 16000
+	cmp di, 16000
 	je fim
 	jmp desenhar
 
